@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>bluerov</name>
+    <version>0.0.1</version>
+    <description>
+        The BlueROV ROS package supports VectorNav VN-100 IMU, Oculus Sonar and RTI Seapilot DVL.
+    </description>
+    <author>Jinkun Wang</author>
+    <maintainer email="jwang92@stevens.edu">Jinkun Wang</maintainer>
+    <license>MIT</license>
+
+    <url type="repository">https://github.com/RobustFieldAutonomyLab/bluerov</url>
+
+    <buildtool_depend>catkin</buildtool_depend>
+</package>

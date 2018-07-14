@@ -1,0 +1,6 @@
+[submodule "imu_vn_100"]
+	path = imu_vn_100
+	url = git@github.com:jinkunw/imu_vn_100.git
+[submodule "rti_dvl/pynmea2"]
+	path = rti_dvl/pynmea2
+	url = git@github.com:jinkunw/pynmea2.git
