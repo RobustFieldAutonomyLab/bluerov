@@ -19,13 +19,14 @@
 
 #include <mutex>
 #include <thread>
-#include "sonar_oculus/DataWrapper.h"
-#include "sonar_oculus/Oculus.h"
+#include "Oculus.h"
+#include "DataWrapper.h"
 
 // ----------------------------------------------------------------------------
 // OsBufferEntry - contains a return message and an embedded image
-class OsBufferEntry {
- public:
+class OsBufferEntry
+{
+public:
   OsBufferEntry();
   ~OsBufferEntry();
 
@@ -34,23 +35,24 @@ class OsBufferEntry {
   void ProcessRaw(char* pData);
 
   // Data
-  OculusSimplePingResult m_rfm;  // The fixed length return fire message
-  unsigned char* m_pImage;       // The image data
-  short* m_pBrgs;                // The bearing table
-  std::mutex m_mutex;            // Lock for buffer accesss
+  OculusSimplePingResult  m_rfm;         // The fixed length return fire message
+  unsigned char*          m_pImage;      // The image data
+  short*                  m_pBrgs;       // The bearing table
+  std::mutex              m_mutex;       // Lock for buffer accesss
 
-  uint8_t* m_pRaw;     // The raw data
-  uint32_t m_rawSize;  // Size of the raw data record
+  uint8_t*                m_pRaw;        // The raw data
+  uint32_t                m_rawSize;     // Size of the raw data record
 };
+
 
 class OsClientCtrl;
 #define OS_BUFFER_SIZE 1
 
 // ----------------------------------------------------------------------------
-// OsReadThread - a worker thread used to read data from the network for the
-// client
-class OsReadThread : public std::thread {
- public:
+// OsReadThread - a worker thread used to read data from the network for the client
+class OsReadThread : public std::thread
+{
+public:
   OsReadThread();
   ~OsReadThread();
 
@@ -64,34 +66,36 @@ class OsReadThread : public std::thread {
   void ProcessPayload(char* pData, uint64_t nData);
 
   // Data
-  OsClientCtrl* m_pClient;  // back pointer to the parent client
-  bool m_active;            // Is the run exec active
-  std::mutex m_mutex;       // Mutex protection for m_active
-  std::mutex m_sending;     // Mutex protection for m_active
+  OsClientCtrl* m_pClient;   // back pointer to the parent client
+  bool          m_active;    // Is the run exec active
+  std::mutex    m_mutex;     // Mutex protection for m_active
+  std::mutex    m_sending;   // Mutex protection for m_active
 
-  std::string m_hostname;  // The hostname/address of the sonar
-  uint16_t m_port;         // The port for sonar comms (currently fixed)
-  int32_t m_nFlushes;  // Number of times the rx buffer has had to be flushed
+  std::string   m_hostname;  // The hostname/address of the sonar
+  uint16_t      m_port;      // The port for sonar comms (currently fixed)
+  int32_t       m_nFlushes;  // Number of times the rx buffer has had to be flushed
 
   // The raw receive buffer
-  char* m_pRxBuffer;  // The rx buffer for incomming data
-  int32_t m_nRxMax;   // The maximum size of the rx Buffer
-  int32_t m_nRxIn;    // The current amount of unprocessed data in the buffer
+  char*         m_pRxBuffer; // The rx buffer for incomming data
+  int32_t       m_nRxMax;    // The maximum size of the rx Buffer
+  int32_t       m_nRxIn;     // The current amount of unprocessed data in the buffer
 
   // The recieve buffer for messages
   OsBufferEntry m_osBuffer[OS_BUFFER_SIZE];
-  unsigned m_osInject;  // The position for the next inject
+  unsigned      m_osInject;   // The position for the next inject
 
   // The raw send buffer
-  int* m_pSocket;  // point to socket fd
-  char* m_pToSend;
-  int64_t m_nToSend;
+  int*          m_pSocket;	//point to socket fd
+  char*         m_pToSend;
+  int64_t       m_nToSend;
 };
+
 
 // ----------------------------------------------------------------------------
 // ClientCtrl - used to communicate with the oculus sonar
-class OsClientCtrl {
- public:
+class OsClientCtrl
+{
+public:
   OsClientCtrl();
   ~OsClientCtrl();
 
@@ -99,12 +103,13 @@ class OsClientCtrl {
   bool Disconnect();
   bool IsOpen();
   void WriteData(char* pData, uint16_t length);
-  void Fire(int mode, double range, double gain, double speedOfSound,
-            double salinity);
+  void Fire(int mode, double range, double gain, double speedOfSound, double salinity);
   void DummyMessage();
 
-  std::string m_hostname;  // The hostname/address of the sonar
-  std::string m_mask;
-  UserConfig m_config;      // Oculus user configuration
-  OsReadThread m_readData;  // The worker thread for reading data
+  std::string 	m_hostname;     	// The hostname/address of the sonar
+  std::string 	m_mask;
+  UserConfig  	m_config;       	// Oculus user configuration
+  OsReadThread  m_readData; 		// The worker thread for reading data
 };
+
+

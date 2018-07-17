@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from pymavlink import mavutil
 import rospy
 from geometry_msgs.msg import Twist
@@ -24,10 +25,19 @@ def cmd_vel_sub(msg):
                                        conn.target_component, *pwm)
 
 
+def test():
+    rate = rospy.Rate(100)
+    pwm = [1500, 1500, 1500, 1500, 1450, 1450, 1100, 1500]
+    for _ in range(100):
+        conn.mav.rc_channels_override_send(conn.target_system,
+                                           conn.target_component, *pwm)
+        rate.sleep()
+
+
 if __name__ == '__main__':
     rospy.init_node('bluerov_control_node')
 
-    device = rospy.get_param('device', 'udp:192.168.2.1:14550')
+    device = rospy.get_param('device', 'udp:192.168.2.1:14552')
     cmd_topic = rospy.get_param('cmd_vel', '/move_base/cmd_vel')
     min_pwm_x = rospy.get_param('min_pwm_x', 1400)
     max_pwm_x = rospy.get_param('max_pwm_x', 1600)
@@ -44,10 +54,17 @@ if __name__ == '__main__':
     min_vel_theta = rospy.get_param(planner + 'min_rot_vel', -1.0)
     max_vel_theta = rospy.get_param(planner + 'max_rot_vel', 1.0)
 
-    conn = mavutil.mavlink_connection(device, write=True)
+    conn = mavutil.mavlink_connection(device, write=True, autoreconnect=True)
+    while not rospy.is_shutdown():
+        msg = conn.recv_match()
+        if msg is not None:
+            rospy.loginfo('Connected to device {}'.format(device))
+            break
+        else:
+            rospy.sleep(1.0)
+
     cmd_vel_sub = rospy.Subscriber(cmd_topic, Twist, cmd_vel_sub)
 
-    rate = rospy.Rate(50)
-    while not rospy.is_shutdown():
-        rate.sleep()
-        ropsy.spin()
+    test()
+    rospy.spin()
+    conn.close()
