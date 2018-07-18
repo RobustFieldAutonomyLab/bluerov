@@ -38,13 +38,13 @@ if __name__ == '__main__':
     rospy.init_node('bluerov_control_node')
 
     device = rospy.get_param('device', 'udp:192.168.2.1:14552')
-    cmd_topic = rospy.get_param('cmd_vel', '/move_base/cmd_vel')
-    min_pwm_x = rospy.get_param('min_pwm_x', 1400)
-    max_pwm_x = rospy.get_param('max_pwm_x', 1600)
-    min_pwm_y = rospy.get_param('min_pwm_y', 1400)
-    max_pwm_y = rospy.get_param('max_pwm_y', 1600)
-    min_pwm_theta = rospy.get_param('min_pwm_theta', 1400)
-    max_pwm_theta = rospy.get_param('max_pwm_theta', 1600)
+    cmd_topic = rospy.get_param('cmd_vel', '/cmd_vel')
+    min_pwm_x = rospy.get_param('min_pwm_x', 1470)
+    max_pwm_x = rospy.get_param('max_pwm_x', 1530)
+    min_pwm_y = rospy.get_param('min_pwm_y', 1470)
+    max_pwm_y = rospy.get_param('max_pwm_y', 1530)
+    min_pwm_theta = rospy.get_param('min_pwm_theta', 1480)
+    max_pwm_theta = rospy.get_param('max_pwm_theta', 1520)
 
     planner = '/move_base/DWAPlannerROS/'
     min_vel_x = rospy.get_param(planner + 'min_vel_x', -0.3)
@@ -65,6 +65,5 @@ if __name__ == '__main__':
 
     cmd_vel_sub = rospy.Subscriber(cmd_topic, Twist, cmd_vel_sub)
 
-    test()
     rospy.spin()
     conn.close()

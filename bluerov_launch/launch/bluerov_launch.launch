@@ -9,6 +9,6 @@
     </node>
 
     <include file="$(find imu_vn_100)/launch/vn_100_cont.launch">
-        <param name="port" default="/tmp/vn100_imu"/>
+        <param name="port" value="/tmp/vn100_imu"/>
     </include>
 </launch>
