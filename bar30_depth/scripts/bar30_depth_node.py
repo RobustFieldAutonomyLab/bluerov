@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import socket
 from pymavlink import mavutil
 import rospy
 from bar30_depth.msg import Depth
@@ -8,7 +9,18 @@ if __name__ == '__main__':
     device = rospy.get_param('device', 'udp:192.168.2.1:14552')
     water = rospy.get_param('water', 'fresh')
 
-    conn = mavutil.mavlink_connection(device, write=False, autoreconnect=True)
+    while not rospy.is_shutdown():
+        try:
+            conn = mavutil.mavlink_connection(
+                device, write=False, autoreconnect=True)
+        except socket.error:
+            rospy.logerr(
+                'Failed to make mavlink connection to device {}'.format(
+                    device))
+            rospy.sleep(1.0)
+        else:
+            break
+
     while not rospy.is_shutdown():
         msg = conn.recv_match()
         if msg is not None:

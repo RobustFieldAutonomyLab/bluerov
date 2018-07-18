@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>bluerov_launch</name>
+    <version>0.0.1</version>
+    <description>The bluerov_launch package</description>
+
+    <maintainer email="jwang92@stevens.edu">Jinkun Wang</maintainer>
+    <license>MIT</license>
+
+    <buildtool_depend>catkin</buildtool_depend>
+    <depend>bar30_depth</depend>
+    <depend>bluerov_control</depend>
+    <depend>sonar_oculus</depend>
+    <depend>rti_dvl</depend>
+    <depend>imu_vn_100</depend>
+</package>

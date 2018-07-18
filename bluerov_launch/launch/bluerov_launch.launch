@@ -1,0 +1,14 @@
+<launch>
+    <node pkg="bar30_depth" name="bar30_depth" type="bar30_depth_node.py">
+        <param name="device" value="udp:192.168.2.1:14552"/>
+        <param name="water" value="fresh"/>
+    </node>
+
+    <node pkg="rti_dvl" name="rti_dvl" type="rti_dvl_node.py">
+        <param name="device" value="/tmp/rti_dvl"/>
+    </node>
+
+    <include file="$(find imu_vn_100)/launch/vn_100_cont.launch">
+        <param name="port" default="/tmp/vn100_imu"/>
+    </include>
+</launch>
