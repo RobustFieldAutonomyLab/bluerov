@@ -1,14 +1,24 @@
 <launch>
-    <node pkg="bar30_depth" name="bar30_depth" type="bar30_depth_node.py">
+    <arg name="qgc" default="true"/>
+    <arg name="imu" default="true"/>
+    <arg name="dvl" default="true"/>
+    <arg name="depth" default="true"/>
+
+    <node pkg="bluerov_launch" name="mavproxy" type="mavproxy.sh"/>
+    <node if="$(arg qgc)" pkg="bluerov_launch" name="qgc" type="qgc.sh"/>
+    <node if="$(arg imu)" pkg="bluerov_launch" name="connect_vn100_imu" type="connect_vn100_imu.sh"/>
+    <node if="$(arg dvl)" pkg="bluerov_launch" name="connect_rti_dvl" type="connect_rti_dvl.sh"/>
+
+    <node if="$(arg depth)" pkg="bar30_depth" name="bar30_depth" type="bar30_depth_node.py">
         <param name="device" value="udp:192.168.2.1:14552"/>
         <param name="water" value="fresh"/>
     </node>
 
-    <node pkg="rti_dvl" name="rti_dvl" type="rti_dvl_node.py">
+    <node if="$(arg dvl)" pkg="rti_dvl" name="rti_dvl" type="rti_dvl_node.py">
         <param name="device" value="/tmp/rti_dvl"/>
     </node>
 
-    <include file="$(find imu_vn_100)/launch/vn_100_cont.launch">
-        <param name="port" value="/tmp/vn100_imu"/>
+    <include if="$(arg imu)" file="$(find imu_vn_100)/launch/vn_100_cont.launch">
+        <arg name="port" value="/tmp/vn100_imu"/>
     </include>
 </launch>

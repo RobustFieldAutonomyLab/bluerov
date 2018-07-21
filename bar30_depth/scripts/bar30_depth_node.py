@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import sys
 import socket
 from pymavlink import mavutil
 import rospy
@@ -20,6 +21,8 @@ if __name__ == '__main__':
             rospy.sleep(1.0)
         else:
             break
+    if rospy.is_shutdown():
+        sys.exit(-1)
 
     while not rospy.is_shutdown():
         msg = conn.recv_match()
@@ -28,6 +31,8 @@ if __name__ == '__main__':
             break
         else:
             rospy.sleep(1.0)
+    if rospy.is_shutdown():
+        sys.exit(-1)
 
     depth_pub = rospy.Publisher('/bar30/depth/raw', Depth, queue_size=10)
     rate = rospy.Rate(100)

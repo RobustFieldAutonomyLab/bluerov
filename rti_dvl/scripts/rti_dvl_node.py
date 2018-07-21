@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import sys
 import rospy
 from std_srvs.srv import Trigger, TriggerResponse, TriggerRequest
 from rti_dvl.msg import DVL
@@ -76,6 +77,8 @@ if __name__ == '__main__':
             rospy.sleep(1.0)
         else:
             break
+    if rospy.is_shutdown():
+        sys.exit(-1)
 
     # #DVL Commands
     # http://rowetechinc.co/wiki/index.php?title=ADCP_Commands
@@ -122,3 +125,4 @@ if __name__ == '__main__':
                 d.transducer_depth = msg.depth / 1000.0
                 d.time = msg.time / 100.0
                 dvl_pub.publish(d)
+    dvl.close()
