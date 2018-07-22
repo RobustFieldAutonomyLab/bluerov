@@ -24,7 +24,8 @@ def generate_map_xy(ping):
     _res = ping.range_resolution
     _height = ping.num_ranges * _res
     _rows = int(np.ceil(_height / _res))
-    _width = np.sin(to_rad(ping.bearings[-1] - ping.bearings[0]) / 2) * _height * 2
+    _width = np.sin(
+        to_rad(ping.bearings[-1] - ping.bearings[0]) / 2) * _height * 2
     _cols = int(np.ceil(_width / _res))
 
     global res, height, rows, width, cols, map_x, map_y, f_bearings
@@ -33,7 +34,11 @@ def generate_map_xy(ping):
     res, height, rows, width, cols = _res, _height, _rows, _width, _cols
 
     bearings = to_rad(np.asarray(ping.bearings, dtype=np.float32))
-    f_bearings = interp1d(bearings, range(len(bearings)), kind='linear', fill_value='extrapolate')
+    f_bearings = interp1d(
+        bearings,
+        range(len(bearings)),
+        kind='linear',
+        fill_value='extrapolate')
 
     XX, YY = np.meshgrid(range(cols), range(rows))
     x = res * (rows - YY)
@@ -45,15 +50,16 @@ def generate_map_xy(ping):
 
 
 def ping_callback(msg):
-    raw = rospy.get_param('/sonar_oculus_node/Raw')
-    cm = rospy.get_param('/sonar_oculus_node/Colormap')
+    raw = rospy.get_param('/sonar_oculus_node/Raw', False)
+    cm = rospy.get_param('/sonar_oculus_node/Colormap', 1)
     if raw:
         img = bridge.imgmsg_to_cv2(msg.ping, desired_encoding='passthrough')
-        img = cv2.normalize(img, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+        img = cv2.normalize(
+            img, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
         img = cv2.applyColorMap(img, cm)
         img_msg = bridge.cv2_to_imgmsg(img, encoding="bgr8")
         img_msg.header.stamp = rospy.Time.now()
-        img_pub.publish(img_msg) 
+        img_pub.publish(img_msg)
     else:
         generate_map_xy(msg)
 
@@ -65,16 +71,18 @@ def ping_callback(msg):
 
         # img_msg = bridge.cv2_to_imgmsg(img, encoding="mono8")
 
-        img = cv2.normalize(img, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+        img = cv2.normalize(
+            img, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
         img = cv2.applyColorMap(img, cm)
         img_msg = bridge.cv2_to_imgmsg(img, encoding="bgr8")
         img_msg.header.stamp = rospy.Time.now()
-        img_pub.publish(img_msg) 
+        img_pub.publish(img_msg)
 
 
 if __name__ == '__main__':
     rospy.init_node('oculus_viewer')
     img_pub = rospy.Publisher('/sonar_oculus_node/image', Image, queue_size=10)
-    ping_sub = rospy.Subscriber('/sonar_oculus_node/ping', OculusPing, ping_callback, None, 10)
+    ping_sub = rospy.Subscriber('/sonar_oculus_node/ping', OculusPing,
+                                ping_callback, None, 10)
 
     rospy.spin()
