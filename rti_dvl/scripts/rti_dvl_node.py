@@ -32,7 +32,7 @@ def toggle_status(req):
 if __name__ == '__main__':
     rospy.init_node('rti_dvl_node')
 
-    dev = rospy.get_param('dev', '/tmp/rti_dvl')
+    dev = rospy.get_param('~dev', '/tmp/rti_dvl')
 
     # eoutput = rospy.get_param('eoutput', 5)
     # ei = rospy.get_param('ei', 0.25)
@@ -122,7 +122,7 @@ if __name__ == '__main__':
                 d.velocity.y = msg.y / 1000.0
                 d.velocity.z = msg.z / 1000.0
                 d.temperature = msg.temperature / 100.0
-                d.transducer_depth = msg.depth / 1000.0
+                d.altitude = msg.depth / 1000.0
                 d.time = msg.time / 100.0
                 dvl_pub.publish(d)
     dvl.close()

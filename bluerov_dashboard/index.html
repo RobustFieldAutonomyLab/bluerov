@@ -17,6 +17,10 @@
   <script src="assets/js/lib/roslib.min.js" type="text/javascript"></script>
   <script src="assets/js/lib/eventemitter2.min.js" type="text/javascript"></script>
   <script src="assets/js/listener.js" type="text/javascript"></script>
+  <script src="assets/js/lib/holder.min.js" type="text/javascript"></script>
+  <script>
+    Holder.add_theme("white", { background: "#fff", foreground: "#a7a7a7", size: 10 });
+  </script>
   <script type="text/javascript">
     var ros = new ROSLIB.Ros({
       url: 'ws://localhost:9090'
@@ -88,6 +92,9 @@
       init_imu_listener();
       init_dvl_listener();
       init_depth_listener();
+
+      init_camera_state();
+      init_sonar_state();
       var myVar = setInterval(update_sensor_rate, 3000);
     }
   </script>
@@ -96,7 +103,7 @@
   <link rel="stylesheet" type="text/css" href="assets/css/keen-dashboards.css" />
 </head>
 
-<body class="keen-dashboard" style="padding-top: 0px;">
+<body class="keen-dashboard" style="padding-top: 50px;">
   <div class="container-fluid">
     <div class="row">
       <div class="col-sm-6">
@@ -180,18 +187,24 @@
           </div>
         </div>
       </div>
-      <div class="col-sm-6">
-        <div class="row">
-          <div class="col-sm-12">
+      <div class="col-sm-4">
+        <div class="row justify-content-md-center">
+          <div class="col-md-auto">
+            <div class="chart-title">
+              <button id="camera_btn" type="button" class="btn btn-dark">Camera</button>
+            </div>
             <div class="chart-wrapper">
-              <img src="http://localhost:8080/stream?topic=/camera/image&bitrate=20000" height="360"></img>
+              <img id="camera" data-src="holder.js/100%x300/white/text:Camera" height="300"></img>
             </div>
           </div>
         </div>
-        <div class="row">
-          <div class="col-sm-12">
+        <div class="row justify-content-md-center">
+          <div class="col-md-auto">
+            <div class="chart-title">
+              <button id="sonar_btn" type="button" class="btn btn-dark">Sonar Oculus</button>
+            </div>
             <div class="chart-wrapper">
-              <img src="http://localhost:8080/stream?topic=/sonar_oculus_node/image&bitrate=20000" height="360"></img>
+              <img id="sonar" data-src="holder.js/100%x300/white/text:Sonar Oculus" height="300"></img>
             </div>
           </div>
         </div>

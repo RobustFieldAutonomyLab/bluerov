@@ -7,8 +7,8 @@ from bar30_depth.msg import Depth
 
 if __name__ == '__main__':
     rospy.init_node('bar30_depth_node')
-    device = rospy.get_param('device', 'udp:192.168.2.1:14552')
-    water = rospy.get_param('water', 'fresh')
+    device = rospy.get_param('~device', 'udp:192.168.2.1:14552')
+    water = rospy.get_param('~water', 'fresh')
 
     while not rospy.is_shutdown():
         try:

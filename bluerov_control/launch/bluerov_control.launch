@@ -3,19 +3,19 @@
     <!--- Sim Time -->
     <!-- <param name="/use_sim_time" value="true" /> -->
 
-    <node pkg="bluerov_planner" type="fake_map" name="fake_map" output="screen"/>
+    <node pkg="bluerov_control" type="fake_map" name="fake_map" output="screen"/>
 
     <!--- Run Move Base -->
     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">        <!--launch-prefix="xterm -e">-->
 
-        <rosparam file="$(find bluerov_planner)/launch/params/move_base/costmap_common_params.yaml" command="load" ns="global_costmap" />
-        <rosparam file="$(find bluerov_planner)/launch/params/move_base/costmap_common_params.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(find bluerov_control)/launch/params/move_base/costmap_common_params.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find bluerov_control)/launch/params/move_base/costmap_common_params.yaml" command="load" ns="local_costmap" />
 
-        <rosparam file="$(find bluerov_planner)/launch/params/move_base/map_nav_params/local_costmap_params.yaml" command="load" />
-        <rosparam file="$(find bluerov_planner)/launch/params/move_base/map_nav_params/global_costmap_params.yaml" command="load" />
+        <rosparam file="$(find bluerov_control)/launch/params/move_base/map_nav_params/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find bluerov_control)/launch/params/move_base/map_nav_params/global_costmap_params.yaml" command="load" />
 
-        <rosparam file="$(find bluerov_planner)/launch/params/move_base/dwa_local_planner_params.yaml" command="load" />
-        <rosparam file="$(find bluerov_planner)/launch/params/move_base/move_base_params.yaml" command="load" />
+        <rosparam file="$(find bluerov_control)/launch/params/move_base/dwa_local_planner_params.yaml" command="load" />
+        <rosparam file="$(find bluerov_control)/launch/params/move_base/move_base_params.yaml" command="load" />
 
         <param name="base_global_planner" type="string" value="navfn/NavfnROS" />
         <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>

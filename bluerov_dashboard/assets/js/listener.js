@@ -398,6 +398,39 @@ function sensor_rate_row_style(row, index) {
     return {}
 }
 
+function init_camera_state() {
+    $('#camera_btn').on('click', function (e) {
+        if ($('#camera_btn').hasClass('btn btn-dark')) {
+            $('#camera_btn').removeClass('btn btn-dark');
+            $('#camera_btn').toggleClass('btn btn-success');
+            $('#camera').attr("src", "http://localhost:8080/stream?topic=/camera/image&bitrate=20000");
+            $('#camera').attr("data-src", null);
+        } else {
+            $('#camera_btn').removeClass('btn btn-success');
+            $('#camera_btn').toggleClass('btn btn-dark');
+            $('#camera').attr("src", null);
+            $('#camera').attr("data-src", "holder.js/100%x300/white/text:Camera");
+            Holder.run({ images: '#camera' });
+        }
+    });
+}
+
+function init_sonar_state() {
+    $('#sonar_btn').on('click', function (e) {
+        if ($('#sonar_btn').hasClass('btn btn-dark')) {
+            $('#sonar_btn').removeClass('btn btn-dark');
+            $('#sonar_btn').toggleClass('btn btn-success');
+            $('#sonar').attr("src", "http://localhost:8080/stream?topic=/sonar_oculus_node/image&bitrate=20000");
+            $('#sonar').attr("data-src", null);
+        } else {
+            $('#sonar_btn').removeClass('btn btn-success');
+            $('#sonar_btn').toggleClass('btn btn-dark');
+            $('#sonar').attr("data-src", "holder.js/100%x300/white/text:Sonar Oculus");
+            Holder.run({ images: '#sonar' });
+        }
+    });
+}
+
 function to_sec(msg) {
     return msg.header.stamp.secs + msg.header.stamp.nsecs * 1e-9;
 }
