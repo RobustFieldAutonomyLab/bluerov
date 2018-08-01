@@ -5,6 +5,8 @@ from pymavlink import mavutil
 import rospy
 from bar30_depth.msg import Depth
 
+FLUID_DENSITY = {'fresh': 9.97, 'salt': 10.29}
+
 if __name__ == '__main__':
     rospy.init_node('bar30_depth_node')
     device = rospy.get_param('~device', 'udp:192.168.2.1:14552')
@@ -45,11 +47,10 @@ if __name__ == '__main__':
             d.pressure_abs = msg.press_abs
             d.pressure_diff = msg.press_diff
             d.temperature = msg.temperature / 100.0
-
-            if water == 'fresh':
-                d.depth = d.pressure_diff / 98.1
-            elif water == 'salt':
-                d.depth = d.pressure_diff / 100.05
+            # Assume pressure_diff is temperature compensated
+            # https://github.com/bluerobotics/ardusub/blob/978cd64a1e3b0cb5ba1f3bcc995fcc39bea7e9ff/libraries/AP_Baro/AP_Baro_MS5611.cpp#L481
+            # https://github.com/bluerobotics/ms5837-python/blob/c83bdc969ea1654a2e2759783546245709bd9914/ms5837.py#L146
+            d.depth = d.pressure_diff / (FLUID_DENSITY[water] * 9.80665)
             depth_pub.publish(d)
         rate.sleep()
     conn.close()
