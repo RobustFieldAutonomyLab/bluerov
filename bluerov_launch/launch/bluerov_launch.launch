@@ -3,29 +3,39 @@
     <arg name="imu" default="true"/>
     <arg name="dvl" default="true"/>
     <arg name="depth" default="true"/>
+    <arg name="sonar" default="false"/>
     <arg name="camera" default="true"/>
+    <arg name="control" default="false"/>
 
-    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
-        <arg name="port" value="9090"/>
+    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
+
+    <node if="$(arg qgc)" pkg="bluerov_launch" name="mavproxy" type="mavproxy.sh"/>
+    <node if="$(arg qgc)" pkg="bluerov_launch" name="qgc" type="qgc.sh"/>
+
+    <node if="$(arg imu)" pkg="bluerov_launch" name="connect_vn100_imu" type="connect_vn100_imu.sh"/>
+    <include if="$(arg imu)" file="$(find imu_vn_100)/launch/vn_100_cont.launch">
+        <arg name="port" value="/tmp/vn100_imu"/>
     </include>
 
-    <node pkg="bluerov_launch" name="mavproxy" type="mavproxy.sh"/>
-    <node if="$(arg qgc)" pkg="bluerov_launch" name="qgc" type="qgc.sh"/>
-    <node if="$(arg imu)" pkg="bluerov_launch" name="connect_vn100_imu" type="connect_vn100_imu.sh"/>
     <node if="$(arg dvl)" pkg="bluerov_launch" name="connect_rti_dvl" type="connect_rti_dvl.sh"/>
-    <node if="$(arg camera)" pkg="bluerov_launch" name="video" type="video.py" output="screen"/>
-    <node if="$(arg camera)" pkg="web_video_server" name="web_video_server" type="web_video_server"/>
+    <node if="$(arg dvl)" pkg="rti_dvl" name="rti_dvl" type="rti_dvl_node.py" output="screen">
+        <param name="device" value="/tmp/rti_dvl"/>
+    </node>
 
     <node if="$(arg depth)" pkg="bar30_depth" name="bar30_depth" type="bar30_depth_node.py" output="screen">
         <param name="device" value="udp:192.168.2.1:14552"/>
         <param name="water" value="fresh"/>
     </node>
 
-    <node if="$(arg dvl)" pkg="rti_dvl" name="rti_dvl" type="rti_dvl_node.py" output="screen">
-        <param name="device" value="/tmp/rti_dvl"/>
+    <node if="$(arg sonar)" pkg="sonar_oculus" name="sonar_oculus_node" type="sonar_oculus_node" output="screen" respawn="true" respawn_delay="5">
+        <param name="frame" type="string" value="/sonar"/>
     </node>
+    <node if="$(arg sonar)" pkg="sonar_oculus" name="sonar_oculus_viewer" type="oculus_viewer.py" output="screen"/>
 
-    <include if="$(arg imu)" file="$(find imu_vn_100)/launch/vn_100_cont.launch">
-        <arg name="port" value="/tmp/vn100_imu"/>
-    </include>
+    <node if="$(arg camera)" pkg="bluerov_launch" name="video" type="video.py" output="screen"/>
+
+    <node if="$(eval arg('sonar') or arg('camera'))" pkg="web_video_server" name="web_video_server" type="web_video_server"/>
+
+    <include if="$(arg control)" file="$(find bluerov_control)/launch/bluerov_control.launch"/>
+
 </launch>

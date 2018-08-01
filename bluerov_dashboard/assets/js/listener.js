@@ -425,7 +425,7 @@ function init_sonar_state() {
         } else {
             $('#sonar_btn').removeClass('btn btn-success');
             $('#sonar_btn').toggleClass('btn btn-dark');
-            $('#sonar').attr("data-src", "holder.js/100%x300/white/text:Sonar Oculus");
+            $('#sonar').attr("data-src", "holder.js/100%x400/white/text:Sonar Oculus");
             Holder.run({ images: '#sonar' });
         }
     });
