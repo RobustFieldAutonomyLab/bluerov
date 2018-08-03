@@ -6,7 +6,7 @@
 
   <maintainer email="mchandrasekaran@slb.com">Muthu Chandrasekaran</maintainer>
   <maintainer email="jwang92@stevens.com">Jinkun Wang</maintainer>
-  <license>MIT</license>
+  <license>BSD 3-Clause License</license>
   <buildtool_depend>catkin</buildtool_depend>
   <depend>rospy</depend>
 </package>

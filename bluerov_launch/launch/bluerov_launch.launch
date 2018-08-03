@@ -27,10 +27,9 @@
         <param name="water" value="fresh"/>
     </node>
 
-    <node if="$(arg sonar)" pkg="sonar_oculus" name="sonar_oculus_node" type="sonar_oculus_node" output="screen" respawn="true" respawn_delay="5">
-        <param name="frame" type="string" value="/sonar"/>
-    </node>
-    <node if="$(arg sonar)" pkg="sonar_oculus" name="sonar_oculus_viewer" type="oculus_viewer.py" output="screen"/>
+    <include if="$(arg sonar)" file="$(find sonar_oculus)/launch/sonar_oculus.launch">
+        <arg name="rqt" value="false"/>
+    </include>
 
     <node if="$(arg camera)" pkg="bluerov_launch" name="video" type="video.py" output="screen"/>
 

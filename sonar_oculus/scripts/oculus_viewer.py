@@ -38,8 +38,8 @@ def generate_map_xy(ping):
         bearings,
         range(len(bearings)),
         kind='linear',
-        fill_valbounds_error=False,
-        ue=-1,
+        bounds_error=False,
+        fill_value=-1,
         assume_sorted=True)
 
     XX, YY = np.meshgrid(range(cols), range(rows))

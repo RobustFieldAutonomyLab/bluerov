@@ -5,7 +5,7 @@
     <description>The bluerov_launch package</description>
 
     <maintainer email="jwang92@stevens.edu">Jinkun Wang</maintainer>
-    <license>MIT</license>
+    <license>BSD 3-Clause License</license>
 
     <buildtool_depend>catkin</buildtool_depend>
     <depend>bar30_depth</depend>
