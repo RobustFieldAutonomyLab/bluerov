@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
     device = rospy.get_param('device', 'udp:192.168.2.1:14553')
     cmd_topic = rospy.get_param('cmd_vel', '/cmd_vel')
-    min_pwm_x = rospy.get_param('min_pwm_x', 1400)
+    min_pwm_x = rospy.get_param('min_pwm_x', 1300)
     max_pwm_x = rospy.get_param('max_pwm_x', 1600)
     rospy.loginfo('pwm_x: {}, {}'.format(min_pwm_x, max_pwm_x))
     min_pwm_y = rospy.get_param('min_pwm_y', 1400)

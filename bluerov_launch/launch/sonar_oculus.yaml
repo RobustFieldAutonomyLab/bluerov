@@ -1,0 +1,31 @@
+!!python/object/new:dynamic_reconfigure.encoding.Config
+dictitems:
+  Colormap: 1
+  Gain: 20
+  Mode: 2
+  Range: 5
+  Raw: false
+  Salinity: 0
+  Speed: 1500
+  Threshold: 90
+  groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+    dictitems:
+      Colormap: 1
+      Gain: 20
+      Mode: 2
+      Range: 5
+      Raw: false
+      Salinity: 0
+      Speed: 1500
+      Threshold: 90
+      groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+        state: []
+      id: 0
+      name: Default
+      parameters: !!python/object/new:dynamic_reconfigure.encoding.Config
+        state: []
+      parent: 0
+      state: true
+      type: ''
+    state: []
+state: []

@@ -49,7 +49,7 @@ def publish_raw(data_raw):
 
 def publish_filtered(data_filtered):
     filtered_point = PointStamped()
-    filtered.header.frame_id = "/map"
+    filtered_point.header.frame_id = "/map"
     filtered_point.header.stamp = rospy.Time.now()
     filtered_point.point.x = data_filtered['x']
     filtered_point.point.y = data_filtered['y']
@@ -59,7 +59,7 @@ def publish_filtered(data_filtered):
 
 if __name__ == '__main__':
     rospy.init_node('waterlinked_gps_node')
-    url = rospy.get_param(url, 'http://192.168.2.94')
+    url = rospy.get_param('url', 'http://192.168.2.94')
 
     raw_pub = rospy.Publisher(
         '/waterlinked_gps/acoustic_position/raw', PointStamped, queue_size=120)
@@ -88,7 +88,7 @@ if __name__ == '__main__':
                 publish_raw(data_raw)
                 last_raw = data_raw
 
-        data_filtered = get_acoustic_position_filtered(base_url)
+        data_filtered = get_acoustic_position_filtered(url)
         if data_filtered is None:
             rospy.logerr(
                 'Fail to retrieve filtered position from waterlinked gps')

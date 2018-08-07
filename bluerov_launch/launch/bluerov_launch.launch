@@ -3,7 +3,8 @@
     <arg name="imu" default="true"/>
     <arg name="dvl" default="true"/>
     <arg name="depth" default="true"/>
-    <arg name="sonar" default="false"/>
+    <arg name="sonar" default="true"/>
+    <arg name="gps" default="true"/>
     <arg name="camera" default="true"/>
     <arg name="control" default="false"/>
 
@@ -30,6 +31,9 @@
     <include if="$(arg sonar)" file="$(find sonar_oculus)/launch/sonar_oculus.launch">
         <arg name="rqt" value="false"/>
     </include>
+    <rosparam if="$(arg sonar)" command="load" file="$(find bluerov_launch)/launch/sonar_oculus.yaml"/>
+
+    <node if="$(arg gps)" pkg="waterlinked_gps" name="waterlinked_gps_node" type="waterlinked_gps_node.py" output="screen"/>
 
     <node if="$(arg camera)" pkg="bluerov_launch" name="video" type="video.py" output="screen"/>
 

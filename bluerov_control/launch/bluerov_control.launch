@@ -5,6 +5,8 @@
 
     <node pkg="bluerov_control" type="fake_map" name="fake_map" output="screen"/>
 
+    <node pkg="bluerov_control" name="bluerov_control" type="bluerov_control.py" output="screen"/>
+
     <!--- Run Move Base -->
     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">        <!--launch-prefix="xterm -e">-->
 
