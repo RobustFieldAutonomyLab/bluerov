@@ -24,9 +24,9 @@ def cmd_vel_sub(msg):
         1500
     ]
     if pwm[3] > 1520:
-        pwm[3] = 1560
+        pwm[3] = 1545
     if pwm[3] < 1480:
-        pwm[3] = 1440
+        pwm[3] = 1455
     rospy.loginfo('pwm {}'.format(pwm))
 
     conn.mav.rc_channels_override_send(conn.target_system,
@@ -47,8 +47,8 @@ if __name__ == '__main__':
 
     device = rospy.get_param('device', 'udp:192.168.2.1:14553')
     cmd_topic = rospy.get_param('cmd_vel', '/cmd_vel')
-    min_pwm_x = rospy.get_param('min_pwm_x', 1300)
-    max_pwm_x = rospy.get_param('max_pwm_x', 1600)
+    min_pwm_x = rospy.get_param('min_pwm_x', 1400)
+    max_pwm_x = rospy.get_param('max_pwm_x', 1650)
     rospy.loginfo('pwm_x: {}, {}'.format(min_pwm_x, max_pwm_x))
     min_pwm_y = rospy.get_param('min_pwm_y', 1400)
     max_pwm_y = rospy.get_param('max_pwm_y', 1600)
