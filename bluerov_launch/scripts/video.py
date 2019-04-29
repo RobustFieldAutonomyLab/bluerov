@@ -8,8 +8,16 @@ import gi
 import numpy as np
 
 import rospy
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, CameraInfo
 import cv_bridge
+
+pub_info = True
+try:
+    import camera_info_manager
+except ImportError as e:
+    rospy.logerr('camera_info_manager_py not installed')
+    pub_info = True
+
 
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst
@@ -146,6 +154,11 @@ if __name__ == '__main__':
     bridge = cv_bridge.CvBridge()
     img_pub = rospy.Publisher('/camera/image', Image, queue_size=10)
 
+    if pub_info:
+        info_pub = rospy.Publisher('/camera/camera_info', CameraInfo, queue_size=10)
+        info_manger = camera_info_manager.CameraInfoManager(cname='camera', namespace='camera')
+        info_manger.loadCameraInfo()
+
     rate = rospy.Rate(10)
     while not rospy.is_shutdown():
         # Wait for the next frame
@@ -155,5 +168,16 @@ if __name__ == '__main__':
         frame = video.frame()
 
         img_msg = bridge.cv2_to_imgmsg(frame, encoding="bgr8")
+        img_msg.header.frame_id = 'camera'
+        img_msg.header.stamp = rospy.Time.now()
         img_pub.publish(img_msg)
+
+        if pub_info:
+            info_msg = info_manger.getCameraInfo()
+            info_msg.header.frame_id = img_msg.header.frame_id
+            info_msg.header.stamp = img_msg.header.stamp
+            info_msg.width = frame.shape[1]
+            info_msg.height = frame.shape[0]
+            info_pub.publish(info_msg)
+
         rate.sleep()
