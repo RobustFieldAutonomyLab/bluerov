@@ -103,7 +103,7 @@ public:
   bool Disconnect();
   bool IsOpen();
   void WriteData(char* pData, uint16_t length);
-  void Fire(int mode, double range, double gain, double speedOfSound, double salinity);
+  void Fire(int mode, int pingRate, double range, double gain, double speedOfSound, double salinity);
   void DummyMessage();
 
   std::string 	m_hostname;     	// The hostname/address of the sonar

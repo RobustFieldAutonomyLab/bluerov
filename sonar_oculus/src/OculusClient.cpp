@@ -417,7 +417,7 @@ void OsClientCtrl::WriteData(char* pData, uint16_t length)
 
 // ----------------------------------------------------------------------------
 // Fire the oculus sonar using the simple fire message
-void OsClientCtrl::Fire(int mode, double range, double gain, double speedOfSound, double salinity)
+void OsClientCtrl::Fire(int mode, int pingRate, double range, double gain, double speedOfSound, double salinity)
 {
   if (IsOpen())
   {
@@ -442,8 +442,9 @@ void OsClientCtrl::Fire(int mode, double range, double gain, double speedOfSound
 
     sfm.flags = flags;                        // Turn on the gain assistance
     sfm.gammaCorrection = 0x7f;
-    sfm.pingRate      = pingRateNormal;
-    sfm.networkSpeed  = 0x00;
+    // sfm.pingRate      = pingRateNormal;
+    sfm.pingRate      = static_cast<PingRateType>(pingRate);
+    sfm.networkSpeed  = 0xff;
     sfm.masterMode    = mode;
     sfm.range         = range;
     sfm.gainPercent   = gain;
