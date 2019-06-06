@@ -68,6 +68,7 @@ def ping_callback(msg):
         img = bridge.imgmsg_to_cv2(msg.ping, desired_encoding='passthrough')
         img = np.array(img, dtype=img.dtype, order='F')
 
+        if cols > img.shape[1]:
         img.resize(rows, cols)
         img = cv2.remap(img, map_x, map_y, cv2.INTER_LINEAR)
 
