@@ -69,7 +69,7 @@ def ping_callback(msg):
         img = np.array(img, dtype=img.dtype, order='F')
 
         if cols > img.shape[1]:
-            img.resize(rows, cols)
+            img = img.resize(rows, cols)
         img = cv2.remap(img, map_x, map_y, cv2.INTER_LINEAR)
 
         # img_msg = bridge.cv2_to_imgmsg(img, encoding="mono8")
