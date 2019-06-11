@@ -4,11 +4,9 @@
     <arg name="dvl" default="true"/>
     <arg name="depth" default="true"/>
     <arg name="sonar" default="true"/>
-    <arg name="gps" default="true"/>
-    <arg name="camera" default="true"/>
+    <arg name="gps" default="false"/>
+    <arg name="camera" default="false"/>
     <arg name="control" default="false"/>
-
-    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
 
     <node if="$(arg qgc)" pkg="bluerov_launch" name="mavproxy" type="mavproxy.sh"/>
     <node if="$(arg qgc)" pkg="bluerov_launch" name="qgc" type="qgc.sh"/>
@@ -35,8 +33,6 @@
     <node if="$(arg gps)" pkg="waterlinked_gps" name="waterlinked_gps_node" type="waterlinked_gps_node.py" output="screen"/>
 
     <node if="$(arg camera)" pkg="bluerov_launch" name="video" type="video.py" output="screen"/>
-
-    <node if="$(eval arg('sonar') or arg('camera'))" pkg="web_video_server" name="web_video_server" type="web_video_server"/>
 
     <include if="$(arg control)" file="$(find bluerov_control)/launch/bluerov_control.launch"/>
 
