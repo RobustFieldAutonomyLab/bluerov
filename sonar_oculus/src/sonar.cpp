@@ -115,6 +115,18 @@ int main(int argc, char **argv) {
     OculusStatusMsg osm;
     if (bytesAvailable > 0) { 
       unsigned bytesRead = read(sockUDP, (char*)&osm, bytesAvailable);
+
+      uint32_t ts = (osm.status >> 14) & 0x0003;
+      if (ts == 0) {
+        ROS_INFO("Temperature OK; the sonar will ping normally");
+      } else if (ts == 1) {
+        ROS_WARN("Temperature high; the sonar will ping at reduced rate");
+      } else if (ts == 3) {
+        ROS_ERROR("Temperature shutdown; the sonar will not longer ping");
+        ros::requestShutdown();
+        return 0;
+      }
+
       struct in_addr ip_addr;
       ip_addr.s_addr = osm.ipAddr;
       partNumber = osm.partNumber;
