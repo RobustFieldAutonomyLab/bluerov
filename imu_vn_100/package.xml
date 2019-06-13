@@ -11,7 +11,6 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <depend>diagnostic_updater</depend>
   <depend>roscpp</depend>
   <depend>sensor_msgs</depend>
 

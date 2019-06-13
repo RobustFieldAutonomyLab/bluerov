@@ -6,14 +6,13 @@ set(CMAKE_CXX_FLAGS "-std=gnu++11")
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
-  diagnostic_updater
 )
 find_package(Boost REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include vncpplib/include
   LIBRARIES imu_vn_100
-  CATKIN_DEPENDS diagnostic_updater roscpp sensor_msgs
+  CATKIN_DEPENDS roscpp sensor_msgs
   DEPENDS Boost
 )
 

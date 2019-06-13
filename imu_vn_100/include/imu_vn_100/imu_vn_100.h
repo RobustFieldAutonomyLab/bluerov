@@ -18,8 +18,6 @@
 #define IMU_VN_100_ROS_H_
 
 #include <ros/ros.h>
-#include <diagnostic_updater/diagnostic_updater.h>
-#include <diagnostic_updater/publisher.h>
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/MagneticField.h>
 #include <sensor_msgs/FluidPressure.h>
@@ -28,33 +26,6 @@
 #include <vn100.h>
 
 namespace imu_vn_100 {
-
-namespace du = diagnostic_updater;
-using TopicDiagnosticPtr = boost::shared_ptr<du::TopicDiagnostic>;
-
-// NOTE: there is a DiagnosedPublisher inside diagnostic_updater
-// but it does not have a default constructor thus we use this simple one
-// instead, which has the same functionality
-struct DiagnosedPublisher {
-  ros::Publisher pub;
-  TopicDiagnosticPtr diag;
-
-  template <typename MessageT>
-  void Create(ros::NodeHandle& pnh, const std::string& topic,
-              du::Updater& updater, double& rate) {
-    pub = pnh.advertise<MessageT>(topic, 1);
-    du::FrequencyStatusParam freq_param(&rate, &rate, 0.01, 10);
-    du::TimeStampStatusParam time_param(0, 0.5 / rate);
-    diag = boost::make_shared<du::TopicDiagnostic>(topic, updater, freq_param,
-                                                   time_param);
-  }
-
-  template <typename MessageT>
-  void Publish(const MessageT& message) {
-    diag->tick(message.header.stamp);
-    pub.publish(message);
-  }
-};
 
 /**
  * @brief ImuVn100 The class is a ros wrapper for the Imu class
@@ -139,13 +110,10 @@ class ImuVn100 {
 
   SyncInfo sync_info_;
 
-  du::Updater updater_;
-  DiagnosedPublisher pd_imu_, pd_mag_, pd_pres_, pd_temp_, pd_rpy_;
   ros::Publisher imu_pub_;
 
   void FixImuRate();
   void LoadParameters();
-  void CreateDiagnosedPublishers();
 };
 
 // Just don't like type that is ALL CAP

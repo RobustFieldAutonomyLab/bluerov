@@ -84,6 +84,8 @@ ImuVn100::ImuVn100(const ros::NodeHandle& pnh)
       frame_id_(std::string("imu")) {
   Initialize();
   imu_vn_100_ptr = this;
+
+  imu_pub_ = pnh_.advertise<Imu>("imu/raw", 200);
 }
 
 ImuVn100::~ImuVn100() { Disconnect(); }
@@ -150,28 +152,6 @@ void ImuVn100::LoadParameters() {
 
   FixImuRate();
   sync_info_.FixSyncRate();
-}
-
-void ImuVn100::CreateDiagnosedPublishers() {
-  imu_rate_double_ = imu_rate_;
-  imu_pub_ = pnh_.advertise<Imu>("imu/raw", 200);
-
-  // pd_imu_.Create<Imu>(pnh_, "imu/raw", updater_, imu_rate_double_);
-  if (enable_mag_) {
-    pd_mag_.Create<MagneticField>(pnh_, "magnetic_field", updater_,
-                                  imu_rate_double_);
-  }
-  if (enable_pres_) {
-    pd_pres_.Create<FluidPressure>(pnh_, "fluid_pressure", updater_,
-                                   imu_rate_double_);
-  }
-  if (enable_temp_) {
-    pd_temp_.Create<Temperature>(pnh_, "temperature", updater_,
-                                 imu_rate_double_);
-  }
-  if (enable_rpy_) {
-      pd_rpy_.Create<Vector3Stamped>(pnh_, "rpy", updater_, imu_rate_double_);
-  }
 }
 
 void ImuVn100::Initialize() {
@@ -312,11 +292,8 @@ void ImuVn100::Initialize() {
         true));
   }
 
-  CreateDiagnosedPublishers();
-
   auto hardware_id = std::string("vn100-") + std::string(model_number_buffer) +
                      std::string(serial_number_buffer);
-  updater_.setHardwareID(hardware_id);
 }
 
 void ImuVn100::Stream(bool async) {
@@ -462,7 +439,6 @@ void ImuVn100::PublishData(const VnDeviceCompositeData& data) {
   }
   imu_msg.linear_acceleration_covariance[0] = data.timeStartup * 1e-9;
   imu_pub_.publish(imu_msg);
-  // pd_imu_.Publish(imu_msg);
 
   if (enable_rpy_) {
     geometry_msgs:Vector3Stamped rpy_msg;
@@ -470,28 +446,24 @@ void ImuVn100::PublishData(const VnDeviceCompositeData& data) {
     rpy_msg.vector.z = data.ypr.yaw * M_PI/180.0;
     rpy_msg.vector.y = data.ypr.pitch * M_PI/180.0;
     rpy_msg.vector.x = data.ypr.roll * M_PI/180.0;
-    pd_rpy_.Publish(rpy_msg);
   }
 
   if (enable_mag_) {
     sensor_msgs::MagneticField mag_msg;
     mag_msg.header = imu_msg.header;
     RosVector3FromVnVector3(mag_msg.magnetic_field, data.magnetic);
-    pd_mag_.Publish(mag_msg);
   }
 
   if (enable_pres_) {
     sensor_msgs::FluidPressure pres_msg;
     pres_msg.header = imu_msg.header;
     pres_msg.fluid_pressure = data.pressure;
-    pd_pres_.Publish(pres_msg);
   }
 
   if (enable_temp_) {
     sensor_msgs::Temperature temp_msg;
     temp_msg.header = imu_msg.header;
     temp_msg.temperature = data.temperature;
-    pd_temp_.Publish(temp_msg);
   }
 
   // sync_info_.Update(data.syncInCnt, imu_msg.header.stamp);
