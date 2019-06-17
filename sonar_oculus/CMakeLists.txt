@@ -39,6 +39,8 @@ add_executable(${PROJECT_NAME}_node src/sonar.cpp src/OculusClient.cpp)
 
 add_dependencies(${PROJECT_NAME}_node ${PROJECT_NAME}_gencfg)
 
+add_dependencies(${PROJECT_NAME}_node ${PROJECT_NAME}_generate_messages_cpp)
+
 target_link_libraries(${PROJECT_NAME}_node
    ${catkin_LIBRARIES}
    ${roslib_LIBRARIES}

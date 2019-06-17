@@ -23,7 +23,7 @@ to_rad = lambda bearing: bearing * np.pi / 18000
 def generate_map_xy(ping):
     _res = ping.range_resolution
     _height = ping.num_ranges * _res
-    _rows = int(np.ceil(_height / _res))
+    _rows = ping.num_ranges
     _width = np.sin(
         to_rad(ping.bearings[-1] - ping.bearings[0]) / 2) * _height * 2
     _cols = int(np.ceil(_width / _res))
@@ -69,7 +69,7 @@ def ping_callback(msg):
         img = np.array(img, dtype=img.dtype, order='F')
 
         if cols > img.shape[1]:
-            img = img.resize(rows, cols)
+            img.resize(rows, cols)
         img = cv2.remap(img, map_x, map_y, cv2.INTER_LINEAR)
 
         # img_msg = bridge.cv2_to_imgmsg(img, encoding="mono8")
