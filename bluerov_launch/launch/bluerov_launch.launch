@@ -27,7 +27,7 @@
     </node>
 
     <include if="$(arg sonar)" file="$(find sonar_oculus)/launch/sonar_oculus.launch">
-        <arg name="rqt" value="false"/>
+        <arg name="rqt" value="true"/>
     </include>
 
     <node if="$(arg gps)" pkg="waterlinked_gps" name="waterlinked_gps_node" type="waterlinked_gps_node.py" output="screen"/>
