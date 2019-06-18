@@ -26,6 +26,14 @@ class Bridge(object):
             TYPE: Dict
         """
         return self.data
+    
+    def get_msg(self, type):
+        """ Return msg
+
+        Returns:
+            TYPE: Dict
+        """
+        return self.conn.recv_match(type)
 
     def get_all_msgs(self):
         """ Return all mavlink messages

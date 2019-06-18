@@ -4,6 +4,7 @@ project(bar30_depth)
 find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
+  bluerov_bridge
   message_generation
 )
 

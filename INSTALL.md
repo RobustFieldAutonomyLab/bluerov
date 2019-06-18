@@ -1,15 +1,14 @@
 # Installation
 
-## Dependencies
-
 ```
-sudo apt-get install socat
+rosdep install --from-paths src --ignore-src -r -y
 
-#sudo apt-get install python-pip
-sudo pip install catkin_tools mavproxy pymavlink
+# MAVProxy and QGroundControl will automatically be installed when calling
+# rosrun bluerov_launch mavproxy.sh
+# rosrun bluerov_launch qgc.sh
 ```
 
-## Build workspace
+# Build workspace
 
 ```
 $ mkdir -p WORKSPACE/src
@@ -17,6 +16,18 @@ $ cd WORKSPACE
 $ catkin init
 $ catkin config --merge-devel
 $ catkin config --cmake-args -DCMAKE_BUILD_TYPE=Releas
+```
+
+# Manual installation
+
+## Dependencies
+
+```
+#sudo apt-get install python-pip
+sudo pip install catkin_tools mavproxy pymavlink scipy
+
+# install ROS dependencies
+sudo apt-get install ros-DISTRO-joy ros-DISTRO-cv-bridge
 ```
 
 ## QGroundControl

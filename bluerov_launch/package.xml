@@ -13,4 +13,9 @@
     <depend>sonar_oculus</depend>
     <depend>rti_dvl</depend>
     <depend>imu_vn_100</depend>
+
+    <depend>socat</depend>
+    <!-- <depend>python-MAVProxy</depend> -->
+    <depend>python-pymavlink</depend>
+    <depend>cv_bridge</depend>
 </package>

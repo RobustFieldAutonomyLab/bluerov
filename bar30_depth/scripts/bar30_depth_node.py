@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import sys
 import socket
-from pymavlink import mavutil
 import rospy
 from bar30_depth.msg import Depth
+
+from bluerov_bridge import Bridge
 
 FLUID_DENSITY = {'fresh': 9.97, 'salt': 10.29}
 
@@ -14,8 +15,7 @@ if __name__ == '__main__':
 
     while not rospy.is_shutdown():
         try:
-            conn = mavutil.mavlink_connection(
-                device, write=False, autoreconnect=True)
+            bridge = Bridge(device, write=False)
         except socket.error:
             rospy.logerr(
                 'Failed to make mavlink connection to device {}'.format(
@@ -26,20 +26,12 @@ if __name__ == '__main__':
     if rospy.is_shutdown():
         sys.exit(-1)
 
-    while not rospy.is_shutdown():
-        msg = conn.recv_match()
-        if msg is not None:
-            rospy.loginfo('Connected to device {}'.format(device))
-            break
-        else:
-            rospy.sleep(1.0)
-    if rospy.is_shutdown():
-        sys.exit(-1)
+    bridge.update()
 
     depth_pub = rospy.Publisher('/bar30/depth/raw', Depth, queue_size=10)
     rate = rospy.Rate(100)
     while not rospy.is_shutdown():
-        msg = conn.recv_match(type='SCALED_PRESSURE2')
+        msg = bridge.get_msg(type='SCALED_PRESSURE2')
         if msg is not None:
             d = Depth()
             d.header.stamp = rospy.Time.now()
