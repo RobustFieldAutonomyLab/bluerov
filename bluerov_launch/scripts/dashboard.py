@@ -7,12 +7,18 @@ from rostopic import ROSTopicHz
 from rti_dvl.msg import DVL
 from sensor_msgs.msg import Imu
 from bar30_depth.msg import Depth
+from sonar_oculus.msg import OculusPing
 
-from bridge import Bridge
+from bluerov_bridge import Bridge
 
-dvl, depth, imu = DVL(), Depth(), Imu()
+
+OCULUS_PARTNUMBER = {0: 'NAN', 1032: 'M750d', 1042: 'M1200d'}
+OCULUS_RATE = {0: 'Normal', 1: 'High', 2: 'Highest', 3: 'Low', 4: 'Lowest'}
+
+dvl, depth, imu, ping = DVL(), Depth(), Imu(), OculusPing()
 hz = ROSTopicHz(-1)
-dvl_hz, depth_hz, imu_hz = 0, 0, 0
+dvl_hz, depth_hz, imu_hz, sonar_hz = 0, 0, 0, 0
+
 
 def dvl_callback(msg):
     global dvl
@@ -32,14 +38,34 @@ def imu_callback(msg):
     hz.callback_hz(msg, 'imu')
 
 
+def sonar_callback(msg):
+    global ping
+    ping = msg
+    hz.callback_hz(msg, 'sonar')
+
+
 if __name__ == "__main__":
     rospy.init_node('bluerov_dashboard')
 
-    rov = Bridge('udp:192.168.2.1:14554', write=False)
+    device = 'udp:192.168.2.1:14553'
+    while not rospy.is_shutdown():
+        try:
+            rov = Bridge(device)
+        except socket.error:
+            rospy.logerr(
+                'Failed to make mavlink connection to device {}'.format(
+                    device))
+            rospy.sleep(1.0)
+        else:
+            break
+    if rospy.is_shutdown():
+        sys.exit(-1)
+    rov.update()
 
     dvl_sub = rospy.Subscriber('/rti/body_velocity/raw', DVL, dvl_callback, queue_size=100)
     depth_sub = rospy.Subscriber('/bar30/depth/raw', Depth, depth_callback, queue_size=100)
     imu_sub = rospy.Subscriber('/vn100/imu/raw', Imu, imu_callback, queue_size=1000)
+    sonar_sub = rospy.Subscriber('/sonar_oculus_node/ping', OculusPing, sonar_callback, queue_size=10)
 
     stdscr = curses.initscr()
     curses.noecho()
@@ -56,6 +82,10 @@ if __name__ == "__main__":
         mode, arm = rov.get_mode()
         arm = 'ARM' if arm else 'DISARM'
 
+        cx, cy, cz, cr = rov.get_cmd_vel()
+
+        water = rospy.get_param('/water', 'NAN')
+
         # 1 Hz
         if n % 10 == 0:
             ret = hz.get_hz('dvl')
@@ -64,25 +94,47 @@ if __name__ == "__main__":
             depth_hz = ret[0] if ret else 0.0
             ret = hz.get_hz('imu')
             imu_hz = ret[0] if ret else 0.0
+            ret = hz.get_hz('sonar')
+            sonar_hz = ret[0] if ret else 0.0
         n += 1
 
-        stdscr.addstr(4, 5, 'Time     | ' + time.ctime())
-        stdscr.addstr(5, 5, 'Battery  | {:.1f}V {:.1f}A'.format(voltage, current))
-        stdscr.addstr(6, 5, 'Mode     | {} {}'.format(mode, arm))
+        stdscr.addstr( 4, 5, '======== Vehicle ============')
+        stdscr.addstr( 5, 5, 'Time       |  {:>15s}'.format(time.strftime('%H:%M:%S', time.gmtime())))
+        stdscr.addstr( 6, 5, 'Battery    |       {:04.1f}V {:03.1f}A'.format(voltage, current))
+        stdscr.addstr( 7, 5, 'Mode       |  {:>8s} {:>6s}'.format(mode, arm))
+        stdscr.addstr( 8, 5, '=============================')
 
-        stdscr.addstr(8, 5, 'DVL         | {:>5.1f} Hz'.format(dvl_hz))
-        stdscr.addstr(9, 5, 'Depth       | {:>5.1f} Hz'.format(depth_hz))
-        stdscr.addstr(10, 5, 'IMU        | {:>5.1f} Hz'.format(imu_hz))
+        stdscr.addstr(10, 5, '======== RC_CHANNELS ========')
+        stdscr.addstr(11, 5, 'Forward    |  {:>15d}'.format(cx))
+        stdscr.addstr(12, 5, 'Lateral    |  {:>15d}'.format(cy))
+        stdscr.addstr(13, 5, 'Throttle   |  {:>15d}'.format(cz))
+        stdscr.addstr(14, 5, 'Yaw        |  {:>15d}'.format(cr))
+        stdscr.addstr(15, 5, '=============================')
 
-        stdscr.addstr(12, 5, 'Depth      | {:>5.1f} m'.format(depth.depth))
-        stdscr.addstr(13, 5, 'Altitude   | {:>5.1f} m'.format(dvl.altitude))
+        stdscr.addstr(17, 5, '======== Sensor Rate ========')
+        stdscr.addstr(18, 5, 'DVL        | {:>13.1f} Hz'.format(dvl_hz))
+        stdscr.addstr(19, 5, 'Depth      | {:>13.1f} Hz'.format(depth_hz))
+        stdscr.addstr(20, 5, 'IMU        | {:>13.1f} Hz'.format(imu_hz))
+        stdscr.addstr(21, 5, 'Sonar      | {:>13.1f} Hz'.format(sonar_hz))
+        stdscr.addstr(22, 5, '=============================')
 
-        stdscr.addstr(15, 5, 'Velocity x | {:>5.1f} m'.format(dvl.velocity.x))
-        stdscr.addstr(16, 5, '         y | {:>5.1f} m'.format(dvl.velocity.y))
-        stdscr.addstr(17, 5, '         z | {:>5.1f} m'.format(dvl.velocity.z))
+        stdscr.addstr(24, 5, '======== Environment ========')
+        stdscr.addstr(25, 5, 'Depth      | {:>14.1f} m'.format(depth.depth))
+        stdscr.addstr(26, 5, 'Altitude   | {:>14.1f} m'.format(dvl.altitude))
+        stdscr.addstr(27, 5, 'Water      | {:>16s}'.format(water))
+        stdscr.addstr(28, 5, '=============================')
 
-        stdscr.addstr(19, 5, 'Orientation roll | {:>5.1f} m'.format(depth.depth))
-        stdscr.addstr(20, 5, 'Altitude  | {:>5.1f} m'.format(dvl.altitude))
+        stdscr.addstr(30, 5, '======== Sonar ==============')
+        stdscr.addstr(31, 5, 'Mode       | {:>16s}'.format(OCULUS_PARTNUMBER[ping.part_number]))
+        stdscr.addstr(32, 5, 'Rate       | {:>16s}'.format(OCULUS_RATE[ping.fire_msg.ping_rate]))
+        stdscr.addstr(33, 5, 'Range      | {:>16.1f}'.format(ping.fire_msg.range))
+        stdscr.addstr(34, 5, '=============================')
+
+        stdscr.addstr(36, 5, '======== Velocity ===========')
+        stdscr.addstr(37, 5, 'X          | {:>12.1f} m/s'.format(dvl.velocity.x))
+        stdscr.addstr(38, 5, 'Y          | {:>12.1f} m/s'.format(dvl.velocity.y))
+        stdscr.addstr(39, 5, 'Z          | {:>12.1f} m/s'.format(dvl.velocity.z))
+        stdscr.addstr(40, 5, '=============================')
 
         stdscr.refresh()
         rate.sleep()

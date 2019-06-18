@@ -1,0 +1,9 @@
+<launch>
+    <node pkg="bluerov_control" name="joy_control" type="joy_control.py" output="screen"/>
+
+    <node pkg="joy" name="joy" type="joy_node" output="screen">
+        <param name="autorepeat_rate" value="20"/>
+        <param name="coalesce_interval" value="0.02"/>
+    </node>
+
+</launch>

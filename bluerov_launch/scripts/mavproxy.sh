@@ -11,4 +11,4 @@ if [ ! -f "/usr/local/bin/mavproxy.py" ]; then
     sudo pip install MAVProxy
 fi
 
-python /usr/local/bin/mavproxy.py --master=udp:192.168.2.1:14550 --out=udp:192.168.2.1:14551 --out=udp:192.168.2.1:14552 --out=udp:192.168.2.1:14553 --out=udp:192.168.2.1:14554 --speech
+python /usr/local/bin/mavproxy.py --master=udp:192.168.2.1:14550 --out=udp:192.168.2.1:14551 --out=udp:192.168.2.1:14552 --out=udp:192.168.2.1:14553 --out=udp:192.168.2.1:14554 --speech --logfile /tmp/mav.tlog

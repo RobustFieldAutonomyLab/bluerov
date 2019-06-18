@@ -33,7 +33,7 @@ class Bridge(object):
         Returns:
             TYPE: Dict
         """
-        return self.conn.recv_match(type)
+        return self.conn.recv_match(type=type)
 
     def get_all_msgs(self):
         """ Return all mavlink messages
@@ -279,8 +279,9 @@ class Bridge(object):
         except:
             return 'MANUAL', False
     
-    def set_cmd_vel(self, pwm_linear_x, pwm_linear_y, pwm_angular_z):
+    def set_cmd_vel(self, pwm_linear_x=1500, pwm_linear_y=1500, pwm_linear_z=1500, pwm_angular_z=1500):
         rc_channel_values = [65535 for _ in range(8)]
+        rc_channel_values[2] = pwm_linear_z
         rc_channel_values[3] = pwm_angular_z
         rc_channel_values[4] = pwm_linear_x
         rc_channel_values[5] = pwm_linear_y
@@ -288,7 +289,16 @@ class Bridge(object):
             self.conn.target_system,                # target_system
             self.conn.target_component,             # target_component
             *rc_channel_values)                     # RC channel list, in microseconds.
-
+    
+    def get_cmd_vel(self):
+        try:
+            pwm_linear_z = self.get_data()['RC_CHANNELS']['chan3_raw']
+            pwm_angular_z = self.get_data()['RC_CHANNELS']['chan4_raw']
+            pwm_linear_x = self.get_data()['RC_CHANNELS']['chan5_raw']
+            pwm_linear_y = self.get_data()['RC_CHANNELS']['chan6_raw']
+            return pwm_linear_x, pwm_linear_y, pwm_linear_z, pwm_angular_z
+        except:
+            return 1500, 1500, 1500, 1500
 
 
 if __name__ == '__main__':
