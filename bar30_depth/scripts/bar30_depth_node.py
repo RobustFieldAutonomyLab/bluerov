@@ -11,7 +11,10 @@ FLUID_DENSITY = {'fresh': 9.97, 'salt': 10.29}
 if __name__ == '__main__':
     rospy.init_node('bar30_depth_node')
     device = rospy.get_param('~device', 'udp:192.168.2.1:14552')
-    water = rospy.get_param('~water', 'fresh')
+
+    if not rospy.has_param('/water'):
+        rospy.set_param('/water', 'salt')
+    water = rospy.get_param('/water', 'fresh')
 
     while not rospy.is_shutdown():
         try:
@@ -45,4 +48,3 @@ if __name__ == '__main__':
             d.depth = d.pressure_diff / (FLUID_DENSITY[water] * 9.80665)
             depth_pub.publish(d)
         rate.sleep()
-    conn.close()

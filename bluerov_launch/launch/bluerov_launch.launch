@@ -7,6 +7,9 @@
     <arg name="gps" default="false"/>
     <arg name="camera" default="false"/>
     <arg name="control" default="false"/>
+    <arg name="water" default="fresh"/>
+
+    <param name="water" type="str" value="$(arg water)"/>
 
     <node if="$(arg qgc)" pkg="bluerov_launch" name="mavproxy" type="mavproxy.sh"/>
     <node if="$(arg qgc)" pkg="bluerov_launch" name="qgc" type="qgc.sh"/>
@@ -23,7 +26,6 @@
 
     <node if="$(arg depth)" pkg="bar30_depth" name="bar30_depth" type="bar30_depth_node.py" output="screen">
         <param name="device" value="udp:192.168.2.1:14552"/>
-        <param name="water" value="fresh"/>
     </node>
 
     <include if="$(arg sonar)" file="$(find sonar_oculus)/launch/sonar_oculus.launch">

@@ -7,6 +7,7 @@ from rti_dvl.msg import DVL
 import pynmea2
 import serial
 
+SALINITY = {'fresh': 0, 'salt': 35}
 
 def zeor_pressure(req):
     rospy.loginfo('Zero pressure sensor')
@@ -33,6 +34,11 @@ if __name__ == '__main__':
     rospy.init_node('rti_dvl_node')
 
     dev = rospy.get_param('~dev', '/tmp/rti_dvl')
+
+    if not rospy.has_param('/water'):
+        rospy.set_param('/water', 'fresh')
+    water = rospy.get_param('/water', 'fresh')
+    salinity = SALINITY[water]
 
     # eoutput = rospy.get_param('eoutput', 5)
     # ei = rospy.get_param('ei', 0.25)
