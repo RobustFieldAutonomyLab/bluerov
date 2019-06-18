@@ -1,0 +1,8 @@
+<launch>
+    <node pkg="bluerov_control" name="cruise_control" type="cruise_control.py" output="screen"/>
+
+    <node pkg="joy" name="joy" type="joy_node" output="screen">
+        <param name="coalesce_interval" value="0.01"/>
+    </node>
+
+</launch>

@@ -1,42 +1,18 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
   <name>bluerov_control</name>
   <version>0.0.0</version>
-  <description>blue_rov_local_planner</description>
-
+  <description>Send twist message to BlueROV</description>
   <maintainer email="tshan3@stevens.edu">Tixiao Shan</maintainer>
-
+  <maintainer email="jwang02@stevens.edu">Jinkun Wang</maintainer>
   <license>BSD 3-Clause License</license>
-
-  <author >Tixiao Shan</author>
+  <author>Tixiao Shan</author>
+  <author>Jinkun Wang</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>roscpp</build_depend>
-  <run_depend>roscpp</run_depend>
-  <build_depend>rospy</build_depend>
-  <run_depend>rospy</run_depend>
-  <build_depend>ros_bridge</build_depend>
-  <run_depend>ros_bridge</run_depend>
-
-  <build_depend>tf</build_depend>
-  <run_depend>tf</run_depend>
-
-  <build_depend>std_msgs</build_depend>
-  <run_depend>std_msgs</run_depend>
-  <build_depend>sensors_msgs</build_depend>
-  <run_depend>sensors_msgs</run_depend>
-  <build_depend>geometry_msgs</build_depend>
-  <run_depend>geometry_msgs</run_depend>
-  <build_depend>nav_msgs</build_depend>
-  <run_depend>nav_msgs</run_depend>
-  <build_depend>pluginlib</build_depend>
-  <run_depend>pluginlib</run_depend>
-  <build_depend>nav_core</build_depend>
-  <run_depend>nav_core</run_depend>
-
-  <export>
-    <nav_core plugin="${prefix}/src/bluerov_planner_plugin.xml" />
-  </export>
-
+  <depend>rospy</depend>
+  <depend>bluerov_bridge</depend>
+  <depend>sensor_msgs</depend>
+  <depend>joy</depend>
 </package>

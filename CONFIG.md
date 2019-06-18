@@ -51,6 +51,7 @@ sudo -H -u pi screen -dm -S video $COMPANION_DIR/tools/streamer.py
   - [b0]/[b1]: arm/disarm
   - [b8]/[b3]: gain inc/dec
   - [a1]/[a0]/[a5]/[a2]: x/y/z/yaw
+  - [a3]/[a4]: x/yaw cruise control
 
 ```
 [b6] [b7]                     [b10]                  |
