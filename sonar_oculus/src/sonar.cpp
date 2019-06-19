@@ -86,7 +86,6 @@ int main(int argc, char **argv) {
   nh.param<std::string>("/water", water, "fresh");
   nh.setParam("/sonar_oculus_node/Salinity", water == "fresh" ? 0 : 35);
 
-  ros::Publisher ping_pub = nh.advertise<sonar_oculus::OculusPing>("ping", 1);
 
   // Setup dynamic server
   dynamic_reconfigure::Server<sonar_oculus::OculusParamsConfig> serverParam;
@@ -129,17 +128,18 @@ int main(int argc, char **argv) {
   listen(sockUDP, 5);
 
 
-  uint32_t ip_addr;
-  std::string device;
-  nh.getParam("device", device);
-  if (!device.empty()) {
-    struct in_addr ip_addr;
-    inet_aton(device.c_str(), &ip_addr);
+  std::string model;
+  std::string ip;
 
-    int part_number;
-    nh.getParam("part_number", part_number);
-
-    partNumber = (uint16_t)part_number;
+  nh.getParam("ip", ip);
+  if (!ip.empty()) {
+    nh.getParam("model", model);
+    if (model == "M750d")
+      partNumber = OculusPartNumberType::partNumberM750d;
+    else if (model == "M1200d")
+      partNumber = OculusPartNumberType::partNumberM1200d;
+    else
+      ROS_ERROR_STREAM("Part number not recognized " << model);
   } 
 
   else {
@@ -163,13 +163,17 @@ int main(int argc, char **argv) {
         return 0;
       }
 
-      ip_addr = osm.ipAddr;
-
       struct in_addr ip_addr;
       ip_addr.s_addr = osm.ipAddr;
+      ip = std::string(inet_ntoa(ip_addr));
       partNumber = osm.partNumber;
-      printf("The IP address is %s\n", inet_ntoa(ip_addr));
-      printf("Oculus part number is %d\n", partNumber);
+
+      if (partNumber == OculusPartNumberType::partNumberM750d)
+        model = "M750d";
+      else if (partNumber == OculusPartNumberType::partNumberM1200d)
+        model = "M1200d";
+      else
+        ROS_ERROR_STREAM("Part number not recognized " << partNumber);
       break;
     }
 
@@ -178,9 +182,14 @@ int main(int argc, char **argv) {
 
   }
 
+  ROS_INFO_STREAM("The IP address is " << ip);
+  ROS_INFO_STREAM("Oculus model is " << model);
+
+  ros::Publisher ping_pub = nh.advertise<sonar_oculus::OculusPing>(model + "/ping", 1);
+
   bzero((char *)&serverTCP, lengthServerTCP);
   serverTCP.sin_family = AF_INET;
-  serverTCP.sin_addr.s_addr = ip_addr;
+  serverTCP.sin_addr.s_addr = inet_addr(ip.c_str());
   serverTCP.sin_port = htons(PORT_TCP);
 
   // Create the TCP socket for main communication or exit

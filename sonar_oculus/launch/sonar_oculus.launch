@@ -2,13 +2,14 @@
   <arg name="rqt" default="true"/>
   <arg name="sonar" default="true"/>
 
-  <arg name="device" default=""/>
-  <arg name="part_number" default=""/>
+  <arg name="ip" default=""/>
+  <!-- model: M750d / M1200d -->
+  <arg name="model" default=""/>
 
   <!-- Start the sonar reading -->
   <node if="$(arg sonar)" name="sonar_oculus_node" pkg="sonar_oculus" type="sonar_oculus_node" output="screen">
-    <param name="device" value="$(arg device)"/>
-    <param name="part_number" value="$(arg part_number)"/>
+    <param name="ip" value="$(arg ip)"/>
+    <param name="model" value="$(arg model)"/>
     <param name="frame" type="string" value="/sonar"/>
   </node>
 
