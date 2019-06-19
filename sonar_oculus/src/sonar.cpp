@@ -128,6 +128,22 @@ int main(int argc, char **argv) {
     error("Error binding UDP listening socket");
   listen(sockUDP, 5);
 
+
+  uint32_t ip_addr;
+  std::string device;
+  nh.getParam("device", device);
+  if (!device.empty()) {
+    struct in_addr ip_addr;
+    inet_aton(device.c_str(), &ip_addr);
+
+    int part_number;
+    nh.getParam("part_number", part_number);
+
+    partNumber = (uint16_t)part_number;
+  } 
+
+  else {
+
   while (true) {
     int64_t bytesAvailable;
     ioctl(sockUDP, FIONREAD, &bytesAvailable);
@@ -147,16 +163,25 @@ int main(int argc, char **argv) {
         return 0;
       }
 
+      ip_addr = osm.ipAddr;
+
       struct in_addr ip_addr;
       ip_addr.s_addr = osm.ipAddr;
       partNumber = osm.partNumber;
       printf("The IP address is %s\n", inet_ntoa(ip_addr));
       printf("Oculus part number is %d\n", partNumber);
+      break;
+    }
 
-      bzero((char *)&serverTCP, lengthServerTCP);
-      serverTCP.sin_family = AF_INET;
-      serverTCP.sin_addr.s_addr = osm.ipAddr;
-      serverTCP.sin_port = htons(PORT_TCP);
+    ros::Duration(1.0).sleep();
+  }
+
+  }
+
+  bzero((char *)&serverTCP, lengthServerTCP);
+  serverTCP.sin_family = AF_INET;
+  serverTCP.sin_addr.s_addr = ip_addr;
+  serverTCP.sin_port = htons(PORT_TCP);
 
   // Create the TCP socket for main communication or exit
   sockTCP = socket(AF_INET, SOCK_STREAM, 0);
@@ -169,13 +194,9 @@ int main(int argc, char **argv) {
       0)
     error("Error increasing RCVBUF for TCP socket");
   if (setsockopt(sockTCP, SOL_SOCKET, SO_KEEPALIVE, &keepalive,
-                 sizeof(keepalive)) < 0)
+                sizeof(keepalive)) < 0)
     error("Error keeping alive option set for TCP socket");
   listen(sockTCP, 5);
-      break;
-    }
-    ros::Duration(1.0).sleep();
-  }
 
   std::string frame_str;
 
