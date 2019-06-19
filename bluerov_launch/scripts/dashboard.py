@@ -13,7 +13,6 @@ from bluerov_bridge import Bridge
 
 
 OCULUS_PARTNUMBER = {0: 'NAN', 1032: 'M750d', 1042: 'M1200d'}
-OCULUS_RATE = {0: 'Normal', 1: 'High', 2: 'Highest', 3: 'Low', 4: 'Lowest'}
 
 dvl, depth, imu, ping = DVL(), Depth(), Imu(), OculusPing()
 hz = ROSTopicHz(-1)
@@ -126,8 +125,8 @@ if __name__ == "__main__":
 
         stdscr.addstr(30, 5, '======== Sonar ==============')
         stdscr.addstr(31, 5, 'Mode       | {:>16s}'.format(OCULUS_PARTNUMBER[ping.part_number]))
-        stdscr.addstr(32, 5, 'Rate       | {:>16s}'.format(OCULUS_RATE[ping.fire_msg.ping_rate]))
-        stdscr.addstr(33, 5, 'Range      | {:>16.1f}'.format(ping.fire_msg.range))
+        stdscr.addstr(32, 5, 'Salinity   | {:>16.1f}'.format(ping.fire_msg.salinity))
+        stdscr.addstr(33, 5, 'Gain       | {:>16.1f}'.format(ping.fire_msg.gain))
         stdscr.addstr(34, 5, '=============================')
 
         stdscr.addstr(36, 5, '======== Velocity ===========')

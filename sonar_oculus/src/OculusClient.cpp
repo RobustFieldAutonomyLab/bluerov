@@ -317,6 +317,10 @@ void OsReadThread::run()
 
     if (bytesAvailable > 0)
     { 
+      // bytesAvailable could be larger than INT_MAX
+      if (bytesAvailable > 1000000)
+        return;
+
       // Make sure there is enough room in the buffer - expand if required
       if (m_nRxIn + bytesAvailable > m_nRxMax)
       {

@@ -49,6 +49,10 @@ void error(const char *msg) {
   exit(0);
 }
 
+// Create sonar oculus control class
+OsClientCtrl sonar;
+uint16_t partNumber;
+
 // Callback for dynamic reconfigure server
 void callback(sonar_oculus::OculusParamsConfig &config, uint32_t level) {
   mode = config.Mode;
@@ -56,6 +60,18 @@ void callback(sonar_oculus::OculusParamsConfig &config, uint32_t level) {
   gain = config.Gain;
   range = config.Range;
   salinity = config.Salinity;
+
+  if (partNumber == OculusPartNumberType::partNumberM750d) {
+    if (mode == 1)
+      range = std::max(0.1, std::min(range, 120.0));
+    else if (mode == 2)
+      range = std::max(0.1, std::min(range, 40.0));
+  } 
+  if (partNumber == OculusPartNumberType::partNumberM1200d) {
+    range = std::max(0.1, std::min(range, 30.0));
+  } 
+
+  sonar.Fire(mode, ping_rate, range, gain, soundspeed, (double)salinity);
 }
 
 // Main program for listening to sonar
@@ -64,6 +80,11 @@ int main(int argc, char **argv) {
   ROS_INFO("Initializing...");
   ros::init(argc, argv, "sonar_oculus");
   ros::NodeHandle nh("~");
+
+  // Read water from /water then set parameter for dynamic_reconfigure 
+  std::string water;
+  nh.param<std::string>("/water", water, "fresh");
+  nh.setParam("/sonar_oculus_node/Salinity", water == "fresh" ? 0 : 35);
 
   ros::Publisher ping_pub = nh.advertise<sonar_oculus::OculusPing>("ping", 1);
 
@@ -107,7 +128,6 @@ int main(int argc, char **argv) {
     error("Error binding UDP listening socket");
   listen(sockUDP, 5);
 
-  uint16_t partNumber;
   while (true) {
     int64_t bytesAvailable;
     ioctl(sockUDP, FIONREAD, &bytesAvailable);
@@ -157,8 +177,6 @@ int main(int argc, char **argv) {
     ros::Duration(1.0).sleep();
   }
 
-  // Create sonar oculus control class
-  OsClientCtrl sonar;
   std::string frame_str;
 
   // Setup Sonar and messages
@@ -216,10 +234,6 @@ int main(int argc, char **argv) {
         fire_msg.header.stamp = ros::Time::now();
 
         fire_msg.mode = sonar.m_readData.m_osBuffer[0].m_rfm.fireMessage.masterMode;
-        fire_msg.ping_rate = 
-          sonar.m_readData.m_osBuffer[0].m_rfm.fireMessage.pingRate;
-        fire_msg.network_speed = 
-          sonar.m_readData.m_osBuffer[0].m_rfm.fireMessage.networkSpeed;
         fire_msg.gamma =
           sonar.m_readData.m_osBuffer[0].m_rfm.fireMessage.gammaCorrection;
         fire_msg.flags = sonar.m_readData.m_osBuffer[0].m_rfm.fireMessage.flags;
@@ -254,7 +268,6 @@ int main(int argc, char **argv) {
     } // if (nbins>0 && nbeams>0 && id>latest_id)
 
     // Fire sonar (so we sleep while the ping travels)
-    sonar.Fire(mode, ping_rate, range, gain, soundspeed, (double)salinity);
     r.sleep();
     ros::spinOnce();
   }
