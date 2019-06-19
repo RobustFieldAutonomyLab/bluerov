@@ -22,12 +22,12 @@ def joy_callback(msg):
     x1 = 1500 + int(msg.axes[1] * limit)
     y1 = 1500 + int(msg.axes[0] * limit)
     z = 1500 + int(msg.axes[5] * limit)
-    yaw1 = 1500 + int(msg.axes[2] * limit)
+    yaw1 = 1500 - int(msg.axes[2] * limit)
 
     # Cruise control
     x2 = 1500 + int(msg.axes[3] * limit)
     y2 = 1500
-    yaw2 = 1500 + int(msg.axes[4] * limit)
+    yaw2 = 1500 - int(msg.axes[4] * limit)
 
     # Normal movement has higher priority
     x = x1 if x1 != 1500 else x2

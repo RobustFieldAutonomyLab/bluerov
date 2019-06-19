@@ -62,3 +62,16 @@ sudo -H -u pi screen -dm -S video $COMPANION_DIR/tools/streamer.py
                                                      |
 [b0] [b1]                     [b4]                   |
 ```
+
+### Set salinity
+
+For pressure sensor, the salinity can be configured in the launch file. But currently for DVL, configure the salinity by running
+
+```
+rosrun rti_dvl minicom.sh
+
+# Type
+STOP<ENTER>
+CWS 0 => fresh 35 => salt <ENTER>
+START<ENTER>
+```

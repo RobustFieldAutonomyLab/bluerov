@@ -40,6 +40,9 @@ if __name__ == '__main__':
     water = rospy.get_param('/water', 'fresh')
     salinity = SALINITY[water]
 
+    # TODO
+    # Change salinity here
+
     # eoutput = rospy.get_param('eoutput', 5)
     # ei = rospy.get_param('ei', 0.25)
 
@@ -119,7 +122,10 @@ if __name__ == '__main__':
     reader = pynmea2.NMEAStreamReader(errors='ignore')
 
     while not rospy.is_shutdown():
-        char = dvl.read()
+        try:
+            char = dvl.read()
+        except serial.SerialException:
+            break
         for msg in reader.next(char):
             if isinstance(msg, pynmea2.types.rti.RTI01):
                 d = DVL()
