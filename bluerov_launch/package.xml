@@ -18,5 +18,5 @@
     <!-- <depend>python-MAVProxy</depend> -->
     <depend>python-pymavlink</depend>
     <depend>cv_bridge</depend>
-    <!-- <depend>minicom</depend> -->
+    <depend>camera_info_manager_py</depend>
 </package>

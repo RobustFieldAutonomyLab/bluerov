@@ -16,7 +16,7 @@ try:
     import camera_info_manager
 except ImportError as e:
     rospy.logerr('camera_info_manager_py not installed')
-    pub_info = True
+    pub_info = False
 
 
 gi.require_version('Gst', '1.0')
