@@ -71,6 +71,8 @@ if __name__ == "__main__":
     curses.cbreak()
     curses.curs_set(0)
 
+    rospy.on_shutdown(curses.endwin)
+
     stdscr.addstr(2, 5, 'BlueROV2 Dashboard')
 
     n, rate = 0, rospy.Rate(10)
@@ -138,10 +140,3 @@ if __name__ == "__main__":
         stdscr.refresh()
         rate.sleep()
     
-
-    curses.nocbreak(); stdscr.keypad(0); curses.echo()
-    curses.endwin()
-    
-
-
-
