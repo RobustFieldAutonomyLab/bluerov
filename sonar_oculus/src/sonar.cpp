@@ -150,8 +150,8 @@ int main(int argc, char **argv) {
       struct in_addr ip_addr;
       ip_addr.s_addr = osm.ipAddr;
       partNumber = osm.partNumber;
-      printf("The IP address is %s\n", inet_ntoa(ip_addr));
-      printf("Oculus part number is %d\n", partNumber);
+      ROS_INFO_STREAM("The IP address is " << inet_ntoa(ip_addr));
+      ROS_INFO_STREAM("Oculus part number is " << partNumber);
 
       bzero((char *)&serverTCP, lengthServerTCP);
       serverTCP.sin_family = AF_INET;

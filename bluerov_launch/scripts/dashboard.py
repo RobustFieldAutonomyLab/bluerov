@@ -129,12 +129,13 @@ if __name__ == "__main__":
         stdscr.addstr(31, 5, 'Mode       | {:>16s}'.format(OCULUS_PARTNUMBER[ping.part_number]))
         stdscr.addstr(32, 5, 'Salinity   | {:>16.1f}'.format(ping.fire_msg.salinity))
         stdscr.addstr(33, 5, 'Gain       | {:>16.1f}'.format(ping.fire_msg.gain))
-        stdscr.addstr(34, 5, '=============================')
+        stdscr.addstr(34, 5, 'Range      | {:>16.1f}'.format(ping.fire_msg.range))
+        stdscr.addstr(35, 5, '=============================')
 
         stdscr.addstr(36, 5, '======== Velocity ===========')
-        stdscr.addstr(37, 5, 'X          | {:>12.1f} m/s'.format(dvl.velocity.x))
-        stdscr.addstr(38, 5, 'Y          | {:>12.1f} m/s'.format(dvl.velocity.y))
-        stdscr.addstr(39, 5, 'Z          | {:>12.1f} m/s'.format(dvl.velocity.z))
+        stdscr.addstr(37, 5, 'X          | {:>12.2f} m/s'.format(dvl.velocity.x))
+        stdscr.addstr(38, 5, 'Y          | {:>12.2f} m/s'.format(dvl.velocity.y))
+        stdscr.addstr(39, 5, 'Z          | {:>12.2f} m/s'.format(dvl.velocity.z))
         stdscr.addstr(40, 5, '=============================')
 
         stdscr.refresh()
