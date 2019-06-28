@@ -74,8 +74,8 @@ def ping_callback(msg):
 
         # img_msg = bridge.cv2_to_imgmsg(img, encoding="mono8")
 
-        img = cv2.normalize(
-            img, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+        # img = cv2.normalize(
+        #     img, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
         img = cv2.applyColorMap(img, cm)
         img_msg = bridge.cv2_to_imgmsg(img, encoding="bgr8")
         img_msg.header.stamp = rospy.Time.now()
