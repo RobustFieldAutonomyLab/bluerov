@@ -51,7 +51,7 @@ void error(const char *msg) {
 
 // Create sonar oculus control class
 OsClientCtrl sonar;
-uint16_t partNumber;
+OculusPartNumberType partNumber;
 
 // Callback for dynamic reconfigure server
 void callback(sonar_oculus::OculusParamsConfig &config, uint32_t level) {
@@ -117,27 +117,20 @@ int main(int argc, char **argv) {
   lengthServerTCP = sizeof(serverTCP);
   
   ROS_INFO("Connecting...");
-  // Create the UDP listening socket or exit
-  sockUDP = socket(AF_INET, SOCK_DGRAM, 0);
-  if (sockUDP < 0)
-    error("Error opening UDP listening socket");
-
-  // Bind the UDP socket to address and port, or exit with error
-  if (bind(sockUDP, (struct sockaddr *)&serverUDP, lengthServerUDP) < 0)
-    error("Error binding UDP listening socket");
-  listen(sockUDP, 5);
-
 
   std::string model;
   std::string ip;
 
-  nh.getParam("ip", ip);
-  if (!ip.empty()) {
-    nh.getParam("model", model);
-    if (model == "M750d")
+  nh.getParam("model", model);
+  if (!model.empty()) {
+    if (model == "M750d") {
+      ip = "192.168.2.3";
       partNumber = OculusPartNumberType::partNumberM750d;
-    else if (model == "M1200d")
+    }
+    else if (model == "M1200d") {
+      ip = "192.168.2.4";
       partNumber = OculusPartNumberType::partNumberM1200d;
+    }
     else
       ROS_ERROR_STREAM("Part number not recognized " << model);
   } 
@@ -145,6 +138,20 @@ int main(int argc, char **argv) {
   else {
 
   while (true) {
+    // Create the UDP listening socket or exit
+    sockUDP = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockUDP < 0)
+      error("Error opening UDP listening socket");
+    
+    int enable = 1;
+    if (setsockopt(sockUDP, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
+      error("setsockopt(SO_REUSEADDR) failed");
+
+    // Bind the UDP socket to address and port, or exit with error
+    if (bind(sockUDP, (struct sockaddr *)&serverUDP, lengthServerUDP) < 0)
+      error("Error binding UDP listening socket");
+    listen(sockUDP, 5);
+
     int64_t bytesAvailable;
     ioctl(sockUDP, FIONREAD, &bytesAvailable);
 
@@ -174,6 +181,8 @@ int main(int argc, char **argv) {
         model = "M1200d";
       else
         ROS_ERROR_STREAM("Part number not recognized " << partNumber);
+
+      close(sockUDP);
       break;
     }
 
@@ -185,7 +194,7 @@ int main(int argc, char **argv) {
   ROS_INFO_STREAM("The IP address is " << ip);
   ROS_INFO_STREAM("Oculus model is " << model);
 
-  ros::Publisher ping_pub = nh.advertise<sonar_oculus::OculusPing>(model + "/ping", 1);
+  ros::Publisher ping_pub = nh.advertise<sonar_oculus::OculusPing>("/sonar_oculus_node/" + model + "/ping", 1);
 
   bzero((char *)&serverTCP, lengthServerTCP);
   serverTCP.sin_family = AF_INET;
@@ -306,7 +315,6 @@ int main(int argc, char **argv) {
   sonar.Disconnect();
 
   // Exit
-  close(sockUDP);
   close(sockTCP);
   return 0;
 

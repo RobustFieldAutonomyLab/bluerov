@@ -84,8 +84,11 @@ def ping_callback(msg):
 
 if __name__ == '__main__':
     rospy.init_node('oculus_viewer')
-    img_pub = rospy.Publisher('/sonar_oculus_node/image', Image, queue_size=10)
-    ping_sub = rospy.Subscriber('/sonar_oculus_node/ping', OculusPing,
+
+    topic = rospy.get_param('~topic', '/sonar_oculus_node/ping')
+    ping_sub = rospy.Subscriber(topic, OculusPing,
                                 ping_callback, None, 10)
+    
+    img_pub = rospy.Publisher(topic.rsplit('/', 1)[0] + '/image', Image, queue_size=10)
 
     rospy.spin()

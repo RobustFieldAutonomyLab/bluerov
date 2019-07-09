@@ -2,24 +2,17 @@
   <arg name="rqt" default="true"/>
   <arg name="sonar" default="true"/>
 
-  <arg name="ip" default=""/>
   <!-- model: M750d / M1200d -->
-  <arg name="model" default=""/>
+  <arg name="model" default="M750d"/>
 
   <!-- Start the sonar reading -->
-  <node if="$(arg sonar)" name="sonar_oculus_node" pkg="sonar_oculus" type="sonar_oculus_node" output="screen">
-    <param name="ip" value="$(arg ip)"/>
+  <node if="$(arg sonar)" name="sonar_oculus_node_$(arg model)" pkg="sonar_oculus" type="sonar_oculus_node" output="screen">
     <param name="model" value="$(arg model)"/>
-    <param name="frame" type="string" value="/sonar"/>
+    <param name="frame" type="string" value="/$(arg model)"/>
   </node>
 
   <!-- Open Oculus viewer -->
-  <node name="sonar_oculus_viewer" pkg="sonar_oculus" type="oculus_viewer.py" output="screen"/>
-
-  <!-- Open RQT with Sonar image viewer and dynamic reconfigure window -->
-  <node if="$(arg rqt)" name="rqt_gui" pkg="rqt_gui" type="rqt_gui" args="--perspective-file $(find sonar_oculus)/launch/sonar_oculus.perspective"/>
-
-  <!-- Establish a static transform to link rviz map to sonar -->
-  <node name="sonar_base_link" pkg="tf2_ros" type="static_transform_publisher" args="0.2 0 0.15 0 0 0 base_link sonar"/>
-
+  <node name="sonar_oculus_viewer_$(arg model)" pkg="sonar_oculus" type="oculus_viewer.py" output="screen">
+    <param name="topic" value="/sonar_oculus_node/$(arg model)/ping"/>
+  </node>
 </launch>
