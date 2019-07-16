@@ -222,7 +222,7 @@ int main(int argc, char **argv) {
         sonar_image.width = nbeams;
         sonar_image.encoding = "8UC1";
         // sonar_image.is_bigendian = 0; // default works
-        sonar_image.step = nbins;
+        sonar_image.step = nbeams;
         sonar_image.data.resize(nbeams * nbins);
         std::copy(sonar.m_readData.m_osBuffer[0].m_pImage,
                   sonar.m_readData.m_osBuffer[0].m_pImage +
