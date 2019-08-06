@@ -81,6 +81,7 @@ if __name__ == '__main__':
         try:
             rospy.loginfo('Open device {}'.format(dev))
             dvl = serial.Serial(dev, dsrdtr=True, rtscts=True, timeout=1.0)
+            # dvl = serial.Serial(dev)
         except serial.SerialException:
             rospy.logerr('Fail to open device {}'.format(dev))
             rospy.sleep(1.0)
@@ -127,7 +128,7 @@ if __name__ == '__main__':
         except serial.SerialException:
             break
         for msg in reader.next(char):
-            if isinstance(msg, pynmea2.types.rti.RTI01):
+            if isinstance(msg, pynmea2.types.rti.RTI01) or isinstance(msg, pynmea2.types.rti.RTI03):
                 d = DVL()
                 d.header.stamp = rospy.Time.now()
                 d.velocity.x = msg.x / 1000.0
