@@ -1,5 +1,15 @@
 <launch>
-    <node pkg="bluerov_control" name="joy_control" type="joy_control.py" output="screen"/>
+    <arg name="pwm_limit" default="100"/>
+    <arg name="enable_dvl" default="false"/>
+    <arg name="max_depth" default="2.0"/>
+    <arg name="min_altitude" default="0.5"/>
+
+    <node pkg="bluerov_control" name="joy_control" type="joy_control.py" output="screen">
+        <param name="pwm_limit" value="$(arg pwm_limit)"/>
+        <param name="enable_dvl" value="$(arg enable_dvl)"/>
+        <param name="max_depth" value="$(arg max_depth)"/>
+        <param name="min_altitude" value="$(arg min_altitude)"/>
+    </node>
 
     <node pkg="joy" name="joy" type="joy_node" output="screen">
         <param name="autorepeat_rate" value="20"/>

@@ -1,11 +1,7 @@
 #!/usr/bin/env python
 import rospy
 from sensor_msgs.msg import Joy
-from rti_dvl.msg import DVL
-from bar30_depth.msg import Depth
-from message_filters import Subscriber, ApproximateTimeSynchronizer
 
-import mavutil
 from bluerov_bridge import Bridge
 
 
@@ -41,31 +37,10 @@ def joy_callback(msg):
     bridge.set_cmd_vel(x, y, z, yaw)
 
 
-##########################################################################
-# https://github.com/bluerobotics/companion/blob/master/tools/ping1d_mavlink_driver.py
-# https://www.ardusub.com/developers/pymavlink.html
-##########################################################################
-def dvl_depth_callback(dvl, depth):
-    a, d = dvl.altitude, depth.d
-    if a + d > max_depth:
-        a = 0
-
-    bridge.conn.mav.distance_sensor_send(
-        int(depth.time * 1000),
-        min_altitude * 100,
-        max_depth * 100,
-        a * 100,
-        mavutils.mavlink.MAV_DISTANCE_SENSOR_UNKNOWN,
-        1,
-        mavutil.mavlink.MAV_SENSOR_ROTATION_PITCH_270,
-        0
-    )
-
-
 if __name__ == '__main__':
     rospy.init_node('bluerov_cruise_control_node')
 
-    limit = rospy.get_param('pwm_limit', 100)
+    limit = rospy.get_param('~pwm_limit', 100)
 
     device = 'udp:192.168.2.1:14553'
     while not rospy.is_shutdown():
@@ -80,20 +55,9 @@ if __name__ == '__main__':
             break
     if rospy.is_shutdown():
         sys.exit(-1)
-    bridge.update()
+    bridge.wait_conn()
 
     joy_sub = rospy.Subscriber('/joy', Joy, joy_callback, queue_size=10)
-
-    enable_dvl = rospy.get_param('enable_dvl', False)
-    max_depth = rospy.get_param('max_depth', 10.0)
-    min_altitude = rospy.get_param('min_altitude', 0.5)
-    if enable_dvl:
-        dvl_sub = Subscriber('/rti/body_velocity/raw', DVL)
-        depth_sub = Subscriber('/bar30/depth/raw', Depth)
-        sync = ApproximateTimeSynchronizer([dvl_sub, depth_sub], 10, 0.5)
-        sync.registerCallback(dvl_depth_callback)
-
-        bridge.conn.mav.param_set_send( 1, 1, "RNGFND_TYPE", 10, mavutil.mavlink.MAV_PARAM_TYPE_INT8)
 
     while not rospy.is_shutdown():
         bridge.set_mode('manual')

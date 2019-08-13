@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import time
 
 from pymavlink import mavutil
 
@@ -9,15 +10,27 @@ class Bridge(object):
         conn (TYPE): MAVLink connection
         data (dict): Deal with all data
     """
-    def __init__(self, device='udp:192.168.2.1:14550', baudrate=115200, write=True):
+    def __init__(self, device='udp:192.168.2.1:14550', baudrate=115200, **kwargs):
         """
         Args:
             device (str, optional): Input device
                 https://ardupilot.github.io/MAVProxy/html/getting_started/starting.html#master
             baudrate (int, optional): Baudrate for serial communication
         """
-        self.conn = mavutil.mavlink_connection(device, baud=baudrate, write=write)
+        self.conn = mavutil.mavlink_connection(device, baud=baudrate, **kwargs)
         self.data = {}
+    
+    def wait_conn(self):
+        msg = None
+        while not msg:
+            self.conn.mav.ping_send(
+                time.time(), # Unix time
+                0, # Ping number
+                0, # Request ping of all systems
+                0 # Request ping of all components
+            )
+            msg = self.conn.recv_match()
+            time.sleep(0.5)
 
     def get_data(self):
         """ Return data
