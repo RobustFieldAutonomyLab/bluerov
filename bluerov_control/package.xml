@@ -3,16 +3,14 @@
   <name>bluerov_control</name>
   <version>0.0.0</version>
   <description>Send twist message to BlueROV</description>
-  <maintainer email="tshan3@stevens.edu">Tixiao Shan</maintainer>
-  <maintainer email="jwang02@stevens.edu">Jinkun Wang</maintainer>
+  <maintainer email="jwang92@stevens.edu">Jinkun Wang</maintainer>
   <license>BSD 3-Clause License</license>
-  <author>Tixiao Shan</author>
   <author>Jinkun Wang</author>
 
   <buildtool_depend>catkin</buildtool_depend>
-
   <depend>rospy</depend>
   <depend>bluerov_bridge</depend>
   <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
   <depend>joy</depend>
 </package>

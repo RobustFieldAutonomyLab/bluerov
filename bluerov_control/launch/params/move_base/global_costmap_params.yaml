@@ -10,9 +10,8 @@ global_costmap:
    origin_y: -10.0
    static_map: true
    rolling_window: false
-   static_layer: {map_topic: /occupancy_map}
+   static_layer: {map_topic: /map}
 
    plugins:
    - {name: static_layer, type: "costmap_2d::StaticLayer"}
-   - {name: obstacles_layer, type: "costmap_2d::ObstacleLayer"}
    - {name: inflater_layer, type: "costmap_2d::InflationLayer"}

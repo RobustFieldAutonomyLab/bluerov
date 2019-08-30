@@ -1,8 +1,20 @@
 #!/usr/bin/env python
 import rospy
 from sensor_msgs.msg import Joy
+from geometry_msgs.msg import Twist
 
 from bluerov_bridge import Bridge
+
+
+def cmd_vel_sub(msg):
+    vel_x, vel_y = msg.linear.x, msg.linear.y
+    vel_theta = msg.angular.z
+
+    x = 1500 + int(vel_x / max_vel_x * limit)
+    y = 1500 + int(vel_y / max_vel_x * limit)
+    z = 65535
+    yaw = 1500 + int(vel_theta / max_vel_theta * limit)
+    bridge.set_cmd_vel(x, y, z, yaw)
 
 
 def joy_callback(msg):
@@ -11,7 +23,7 @@ def joy_callback(msg):
         bridge.arm_throttle(True)
     if msg.buttons[1]:
         bridge.arm_throttle(False)
-    
+
     # Depth hold / manual
     if msg.buttons[2]:
         bridge.set_mode('alt_hold')
@@ -48,8 +60,8 @@ if __name__ == '__main__':
             bridge = Bridge(device)
         except socket.error:
             rospy.logerr(
-                'Failed to make mavlink connection to device {}'.format(
-                    device))
+                'Failed to make mavlink connection to device {}'.format(device)
+            )
             rospy.sleep(1.0)
         else:
             break
@@ -57,7 +69,14 @@ if __name__ == '__main__':
         sys.exit(-1)
     bridge.wait_conn()
 
+    planner = '/move_base/DWAPlannerROS/'
+    max_vel_x = rospy.get_param(planner + 'max_vel_x')
+    rospy.loginfo('translational velocity: [0.0, {}]'.format(max_vel_x))
+    max_vel_theta = rospy.get_param(planner + 'max_rot_vel')
+    rospy.loginfo('angular velocity: [-{}, {}]'.format(max_vel_theta, max_vel_theta))
+
     joy_sub = rospy.Subscriber('/joy', Joy, joy_callback, queue_size=10)
+    cmd_vel_sub = rospy.Subscriber('/cmd_vel', Twist, cmd_vel_sub)
 
     while not rospy.is_shutdown():
         bridge.set_mode('manual')

@@ -10,11 +10,6 @@
     <arg name="water" default="fresh"/>
 
     <arg name="pwm_limit" default="100"/>
-    <!-- For altitude hold -->
-    <arg name="altitude_hold" default="false"/>
-    <arg name="max_depth" default="2.0"/>
-    <arg name="min_altitude" default="0.3"/>
-
     <param name="water" type="str" value="$(arg water)"/>
 
     <node pkg="bluerov_launch" name="mavproxy" type="mavproxy.sh"/>
@@ -22,11 +17,6 @@
     <include if="$(arg joy)" file="$(find bluerov_control)/launch/joy_control.launch">
         <arg name="pwm_limit" value="$(arg pwm_limit)"/>
     </include>
-
-    <node if="$(arg altitude_hold)" pkg="bluerov_control" name="altitude_hold" type="altitude_hold_node.py" output="screen">
-        <param name="max_depth" value="$(arg max_depth)"/>
-        <param name="min_altitude" value="$(arg min_altitude)"/>
-    </node>
 
     <node if="$(arg imu)" pkg="bluerov_launch" name="connect_vn100_imu" type="connect_vn100_imu.sh"/>
     <include if="$(arg imu)" file="$(find imu_vn_100)/launch/vn_100_cont.launch">
