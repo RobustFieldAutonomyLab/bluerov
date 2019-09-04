@@ -6,14 +6,24 @@ from geometry_msgs.msg import Twist
 from bluerov_bridge import Bridge
 
 
+max_vel = 0.2
+max_omega = 0.15
+vel_to_cmd = 60 / 0.2
+omega_to_cmd = 60 / 0.15
+
+
 def cmd_vel_sub(msg):
     vel_x, vel_y = msg.linear.x, msg.linear.y
-    vel_theta = msg.angular.z
+    omega_z = msg.angular.z
 
-    x = 1500 + int(vel_x / max_vel_x * limit)
-    y = 1500 + int(vel_y / max_vel_x * limit)
+    vel_x = max(-max_vel, min(max_vel, vel_x))
+    vel_y = max(-max_vel, min(max_vel, vel_y))
+    omega_z = max(-max_omega, min(max_omega, omega_z))
+
+    x = 1500 + int(vel_to_cmd * vel_x)
+    y = 1500 + int(vel_to_cmd * vel_y)
     z = 65535
-    yaw = 1500 + int(vel_theta / max_vel_theta * limit)
+    yaw = 1500 + int(omega_to_cmd * omega_z)
     bridge.set_cmd_vel(x, y, z, yaw)
 
 
@@ -68,12 +78,6 @@ if __name__ == '__main__':
     if rospy.is_shutdown():
         sys.exit(-1)
     bridge.wait_conn()
-
-    planner = '/move_base/DWAPlannerROS/'
-    max_vel_x = rospy.get_param(planner + 'max_vel_x')
-    rospy.loginfo('translational velocity: [0.0, {}]'.format(max_vel_x))
-    max_vel_theta = rospy.get_param(planner + 'max_rot_vel')
-    rospy.loginfo('angular velocity: [-{}, {}]'.format(max_vel_theta, max_vel_theta))
 
     joy_sub = rospy.Subscriber('/joy', Joy, joy_callback, queue_size=10)
     cmd_vel_sub = rospy.Subscriber('/cmd_vel', Twist, cmd_vel_sub)
