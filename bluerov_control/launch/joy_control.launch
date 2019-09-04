@@ -1,12 +1,14 @@
 <launch>
-    <arg name="pwm_limit" default="100"/>
+    <arg name="translation_limit" default="100"/>
+    <arg name="rotation_limit" default="80"/>
 
     <node pkg="bluerov_control" name="joy_control" type="joy_control.py" output="screen">
-        <param name="pwm_limit" value="$(arg pwm_limit)"/>
+        <param name="translaiton_limit" value="$(arg translation_limit)"/>
+        <param name="rotation_limit" value="$(arg rotation_limit)"/>
     </node>
 
     <node pkg="joy" name="joy" type="joy_node" output="screen">
-        <param name="autorepeat_rate" value="20"/>
+        <!-- <param name="autorepeat_rate" value="20"/> -->
         <param name="coalesce_interval" value="0.02"/>
     </node>
 

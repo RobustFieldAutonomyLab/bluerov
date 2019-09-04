@@ -6,13 +6,22 @@ from geometry_msgs.msg import Twist
 from bluerov_bridge import Bridge
 
 
+cmd_vel_enabled = False
 max_vel = 0.2
 max_omega = 0.15
 vel_to_cmd = 60 / 0.2
 omega_to_cmd = 60 / 0.15
 
+armed = False
+depth_hold = False
+x, y, z, yaw = 1500, 1500, 1500, 1500
+
 
 def cmd_vel_sub(msg):
+    if not cmd_vel_enabled:
+        return
+
+    global x, y, z, yaw
     vel_x, vel_y = msg.linear.x, msg.linear.y
     omega_z = msg.angular.z
 
@@ -24,45 +33,59 @@ def cmd_vel_sub(msg):
     y = 1500 + int(vel_to_cmd * vel_y)
     z = 65535
     yaw = 1500 + int(omega_to_cmd * omega_z)
-    bridge.set_cmd_vel(x, y, z, yaw)
 
 
 def joy_callback(msg):
+    global x, y, z, yaw, armed, cmd_vel_enabled, depth_hold
+
     # Arm / disarm
     if msg.buttons[0]:
-        bridge.arm_throttle(True)
+        armed = True
+        rospy.loginfo('Arm the vehicle...')
     if msg.buttons[1]:
-        bridge.arm_throttle(False)
+        armed = False
+        rospy.loginfo('Disarm the vehicle...')
+
+    if msg.buttons[8]:
+        cmd_vel_enabled = True
+        rospy.loginfo('Enable move_base control...')
+    if msg.buttons[3]:
+        cmd_vel_enabled = False
+        rospy.loginfo('Disable move_base control...')
 
     # Depth hold / manual
     if msg.buttons[2]:
-        bridge.set_mode('alt_hold')
+        depth_hold = True
+        rospy.loginfo('Turn on depth hold mode...')
     if msg.buttons[9]:
-        bridge.set_mode('manual')
+        depth_hold = False
+        rospy.loginfo('Turn on manual mode...')
+    
+    if cmd_vel_enabled:
+        return
 
     # Movement
-    x1 = 1500 + int(msg.axes[1] * limit)
-    y1 = 1500 + int(msg.axes[0] * limit)
-    z = 1500 + int(msg.axes[5] * limit)
-    yaw1 = 1500 - int(msg.axes[2] * limit)
+    x1 = 1500 + int(msg.axes[1] * translation_limit)
+    y1 = 1500 + int(msg.axes[0] * translation_limit)
+    z = 1500 + int(msg.axes[5] * translation_limit)
+    yaw1 = 1500 - int(msg.axes[2] * rotation_limit)
 
     # Cruise control
-    x2 = 1500 + int(msg.axes[3] * limit)
+    x2 = 1500 + int(msg.axes[3] * translation_limit)
     y2 = 1500
-    yaw2 = 1500 - int(msg.axes[4] * limit)
+    yaw2 = 1500 - int(msg.axes[4] * rotation_limit)
 
     # Normal movement has higher priority
     x = x1 if x1 != 1500 else x2
     y = y1 if y1 != 1500 else y2
     yaw = yaw1 if yaw1 != 1500 else yaw2
 
-    bridge.set_cmd_vel(x, y, z, yaw)
-
 
 if __name__ == '__main__':
     rospy.init_node('bluerov_cruise_control_node')
 
-    limit = rospy.get_param('~pwm_limit', 100)
+    translation_limit = rospy.get_param('~translation_limit', 100)
+    rotation_limit = rospy.get_param('~rotation_limit', 80)
 
     device = 'udp:192.168.2.1:14553'
     while not rospy.is_shutdown():
@@ -90,9 +113,21 @@ if __name__ == '__main__':
             break
         rospy.sleep(0.5)
 
-    rate = rospy.Rate(50)
+    rate = rospy.Rate(20)
     while not rospy.is_shutdown():
         bridge.update()
+
+        if armed:
+            bridge.arm_throttle(True)
+        else:
+            bridge.arm_throttle(False)
+
+        if depth_hold:
+            bridge.set_mode('alt_hold')
+        else:
+            bridge.set_mode('manual')
+
+        bridge.set_cmd_vel(x, y, z, yaw)
         rate.sleep()
 
     while not rospy.is_shutdown():

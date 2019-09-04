@@ -9,7 +9,9 @@
 
   <buildtool_depend>catkin</buildtool_depend>
   <depend>rospy</depend>
-  <depend>nav_core</depend>
+  <depend>move_base</depend>
+  <depend>teb_local_planner</depend>
+  <depend>map_server</depend>
   <depend>bluerov_bridge</depend>
   <depend>sensor_msgs</depend>
   <depend>geometry_msgs</depend>

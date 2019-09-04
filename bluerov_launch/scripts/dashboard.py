@@ -141,3 +141,6 @@ if __name__ == "__main__":
         stdscr.refresh()
         rate.sleep()
     
+    curses.nocbreak(); stdscr.keypad(0); curses.echo()
+    curses.endwin()
+    
