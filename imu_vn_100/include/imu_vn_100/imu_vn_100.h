@@ -114,6 +114,16 @@ class ImuVn100 {
 
   void FixImuRate();
   void LoadParameters();
+
+  // used for clock synchronziation
+  bool synchronize_time_;
+  double hardware_clock_;
+  uint64_t last_hardware_time_stamp_;
+  double hardware_clock_adj_;
+  const double adj_alpha_ = .01;
+  uint64_t adj_count_;
+
+  ros::Time getSynchronizedTime(uint64_t time_stamp, const ros::Time &system_time);
 };
 
 // Just don't like type that is ALL CAP
