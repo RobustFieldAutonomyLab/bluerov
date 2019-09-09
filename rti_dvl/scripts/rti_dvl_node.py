@@ -27,7 +27,7 @@ class SyncTime(object):
         delta = time_stamp - self.last_hardware_time_stamp
         self.hardware_clock += delta
         cur_adj = system_time_stamp.to_sec() - self.hardware_clock
-        if adj_count > 0:
+        if self.adj_count > 0:
             self.hardware_clock_adj = (
                 self.adj_alpha * cur_adj
                 + (1.0 - self.adj_alpha) * self.hardware_clock_adj
