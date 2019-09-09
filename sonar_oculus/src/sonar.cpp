@@ -129,8 +129,12 @@ int main(int argc, char **argv) {
   listen(sockUDP, 5);
 
   while (true) {
-    int64_t bytesAvailable;
-    ioctl(sockUDP, FIONREAD, &bytesAvailable);
+    int64_t bytesAvailable = 0;
+    if (ioctl(sockUDP, FIONREAD, &bytesAvailable) < 0) {
+        printf("ioctl failed and returned errno %s \n",strerror(errno));
+        ros::Duration(1.0).sleep();
+        continue;
+    }
 
     OculusStatusMsg osm;
     if (bytesAvailable > 0) { 
