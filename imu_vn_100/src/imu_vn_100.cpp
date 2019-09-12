@@ -420,7 +420,8 @@ void ImuVn100::Disconnect() {
 
 void ImuVn100::PublishData(const VnDeviceCompositeData& data) {
   sensor_msgs::Imu imu_msg;
-  imu_msg.header.stamp = ros::Time::now();
+  // imu_msg.header.stamp = ros::Time::now();
+  imu_msg.header.stamp = getSynchronizedTime(data.timeStartup, ros::Time::now());
   imu_msg.header.frame_id = frame_id_;
 
   if (imu_compensated_) {
@@ -470,6 +471,45 @@ void ImuVn100::PublishData(const VnDeviceCompositeData& data) {
 
   // updater_.update();
 }
+
+ros::Time ImuVn100::getSynchronizedTime(uint64_t time_stamp, const ros::Time &system_time)
+{
+  ros::Time stamp = system_time;
+
+  double delta = (time_stamp - last_hardware_time_stamp_) * 1.0e-9;
+  hardware_clock_ += delta;
+  double cur_adj = stamp.toSec() - hardware_clock_;
+  if (adj_count_ > 0)
+  {
+    hardware_clock_adj_ = adj_alpha_*cur_adj+(1.0-adj_alpha_)*hardware_clock_adj_;
+  }
+  else
+  {
+    // Initialize the EMA
+    hardware_clock_adj_ = cur_adj;
+  }
+  adj_count_++;
+  last_hardware_time_stamp_ = time_stamp;
+
+  // Once hardware clock is synchronized, use it. Otherwise just return the
+  // input system_time_stamp as ros::Time.
+  if (adj_count_ > 100)
+  {
+    stamp.fromSec(hardware_clock_+hardware_clock_adj_);
+    // If the time error is large a clock warp has occurred.
+    // Reset the EMA and use the system time.
+    if (fabs((stamp-system_time).toSec()) > 0.1)
+    {
+        adj_count_ = 0;
+        hardware_clock_ = 0.0;
+        last_hardware_time_stamp_ = 0;
+        stamp = system_time;
+        ROS_INFO("%s: detected clock warp, reset EMA", __func__);
+    }
+  }
+  return stamp;
+}
+
 
 void VnEnsure(const VnErrorCode& error_code) {
   if (error_code == VNERR_NO_ERROR) return;

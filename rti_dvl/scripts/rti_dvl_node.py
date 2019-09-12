@@ -9,25 +9,66 @@ import serial
 
 SALINITY = {'fresh': 0, 'salt': 35}
 
-def zeor_pressure(req):
-    rospy.loginfo('Zero pressure sensor')
 
-    dvl.write('CPZ\r\n')
-    return TriggerResponse(success=True)
+class SyncTime(object):
+    """Time translator
+    - See https://github.com/ethz-asl/cuckoo_time_translator for more details.
+    - Implement https://github.com/ros-drivers/urg_node/blob/d2722c60f1b4713bbe1d39f32849090dece0104d/src/urg_c_wrapper.cpp#L1052
+    """
+
+    def __init__(self):
+        self.hardware_clock = 0.0
+        self.last_hardware_time_stamp = 0.0
+        self.hardware_clock_adj = 0.0
+        self.adj_count = 0
+        self.adj_alpha = 0.01
+
+    def sync(self, time_stamp, system_time_stamp):
+        delta = time_stamp - self.last_hardware_time_stamp
+        self.hardware_clock += delta
+        cur_adj = system_time_stamp.to_sec() - self.hardware_clock
+        if self.adj_count > 0:
+            self.hardware_clock_adj = (
+                self.adj_alpha * cur_adj
+                + (1.0 - self.adj_alpha) * self.hardware_clock_adj
+            )
+        else:
+            self.hardware_clock_adj = cur_adj
+
+        self.adj_count += 1
+        self.last_hardware_time_stamp = time_stamp
+
+        stamp = system_time_stamp
+        if self.adj_count > 100:
+            stamp = stamp.from_sec(self.hardware_clock + self.hardware_clock_adj)
+
+            if abs((stamp - system_time_stamp).to_sec()) > 0.1:
+                self.adj_count = 0
+                self.hardware_clock = 0.0
+                self.last_hardware_time_stamp = 0.0
+                self.stamp = system_time_stamp
+        return stamp
 
 
-def toggle_status(req):
-    global running
-    if running:
-        rospy.loginfo('Stop DVL')
-        dvl.write('STOP\r\n')
-        running = False
-        return TriggerResponse(success=True, message='Stop')
-    else:
-        rospy.loginfo('Start DVL')
-        dvl.write('START\r\n')
-        running = True
-        return TriggerResponse(success=True, message='Start')
+# def zeor_pressure(req):
+#     rospy.loginfo('Zero pressure sensor')
+
+#     dvl.write('CPZ\r\n')
+#     return TriggerResponse(success=True)
+
+
+# def toggle_status(req):
+#     global running
+#     if running:
+#         rospy.loginfo('Stop DVL')
+#         dvl.write('STOP\r\n')
+#         running = False
+#         return TriggerResponse(success=True, message='Stop')
+#     else:
+#         rospy.loginfo('Start DVL')
+#         dvl.write('START\r\n')
+#         running = True
+#         return TriggerResponse(success=True, message='Start')
 
 
 if __name__ == '__main__':
@@ -39,6 +80,8 @@ if __name__ == '__main__':
         rospy.set_param('/water', 'fresh')
     water = rospy.get_param('/water', 'fresh')
     salinity = SALINITY[water]
+
+    rospy.logwarn('Water is {}. Please set salinity in DVL.'.format(water))
 
     # TODO
     # Change salinity here
@@ -122,15 +165,19 @@ if __name__ == '__main__':
     dvl_pub = rospy.Publisher('/rti/body_velocity/raw', DVL, queue_size=100)
     reader = pynmea2.NMEAStreamReader(errors='ignore')
 
+    sync = SyncTime()
     while not rospy.is_shutdown():
         try:
             char = dvl.read()
         except serial.SerialException:
             break
         for msg in reader.next(char):
-            if isinstance(msg, pynmea2.types.rti.RTI01) or isinstance(msg, pynmea2.types.rti.RTI03):
+            if isinstance(msg, pynmea2.types.rti.RTI01) or isinstance(
+                msg, pynmea2.types.rti.RTI03
+            ):
                 d = DVL()
-                d.header.stamp = rospy.Time.now()
+                stamp = sync.sync(msg.time / 100.0, rospy.Time.now())
+                d.header.stamp = stamp
                 d.velocity.x = msg.x / 1000.0
                 d.velocity.y = msg.y / 1000.0
                 d.velocity.z = msg.z / 1000.0
