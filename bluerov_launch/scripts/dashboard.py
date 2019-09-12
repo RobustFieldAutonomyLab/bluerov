@@ -4,7 +4,7 @@ import curses
 
 import rospy
 from rostopic import ROSTopicHz
-from rti_dvl.msg import DVL
+from rti_dvl.msg import BottomTrack
 from sensor_msgs.msg import Imu
 from bar30_depth.msg import Depth
 from sonar_oculus.msg import OculusPing
@@ -14,7 +14,7 @@ from bluerov_bridge import Bridge
 
 OCULUS_PARTNUMBER = {0: 'NAN', 1032: 'M750d', 1042: 'M1200d'}
 
-dvl, depth, imu, ping = DVL(), Depth(), Imu(), OculusPing()
+dvl, depth, imu, ping = BottomTrack(), Depth(), Imu(), OculusPing()
 hz = ROSTopicHz(-1)
 dvl_hz, depth_hz, imu_hz, sonar_hz = 0, 0, 0, 0
 
@@ -61,7 +61,7 @@ if __name__ == "__main__":
         sys.exit(-1)
     rov.update()
 
-    dvl_sub = rospy.Subscriber('/rti/body_velocity/raw', DVL, dvl_callback, queue_size=100)
+    dvl_sub = rospy.Subscriber('/rti/body_velocity/raw', BottomTrack, dvl_callback, queue_size=100)
     depth_sub = rospy.Subscriber('/bar30/depth/raw', Depth, depth_callback, queue_size=100)
     imu_sub = rospy.Subscriber('/vn100/imu/raw', Imu, imu_callback, queue_size=1000)
     sonar_sub = rospy.Subscriber('/sonar_oculus_node/ping', OculusPing, sonar_callback, queue_size=10)
