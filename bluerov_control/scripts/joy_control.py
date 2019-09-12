@@ -7,11 +7,6 @@ from bluerov_bridge import Bridge
 
 
 cmd_vel_enabled = False
-max_vel = 0.2
-max_omega = 0.15
-vel_to_cmd = 60 / 0.2
-omega_to_cmd = 60 / 0.15
-
 armed = False
 depth_hold = False
 x, y, z, yaw = 1500, 1500, 1500, 1500
@@ -86,6 +81,10 @@ if __name__ == '__main__':
 
     translation_limit = rospy.get_param('~translation_limit', 100)
     rotation_limit = rospy.get_param('~rotation_limit', 80)
+    max_vel = rospy.get_param('~max_vel', 0.2)
+    max_omega = rospy.get_param('~max_omega', 0.15)
+    vel_to_cmd = translation_limit / max_vel
+    omega_to_cmd = rotation_limit / max_omega
 
     device = 'udp:192.168.2.1:14553'
     while not rospy.is_shutdown():
