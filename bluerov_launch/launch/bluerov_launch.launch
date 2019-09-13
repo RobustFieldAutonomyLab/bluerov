@@ -7,17 +7,24 @@
     <arg name="gps" default="false"/>
     <arg name="camera" default="false"/>
     <arg name="joy" default="true"/>
-    <arg name="water" default="fresh"/>
+
+    <!-- global salinity parameter used by sonar/dvl/depth -->
+    <arg name="water" default="salt"/>
+    <param name="water" type="str" value="$(arg water)"/>
 
     <arg name="translation_limit" default="100"/>
     <arg name="rotation_limit" default="80"/>
-    <param name="water" type="str" value="$(arg water)"/>
+    <!-- cmd_vel limit (max will ouput max PWM) -->
+    <arg name="max_vel" default="0.2"/>
+    <arg name="max_omega" default="0.15"/>
 
     <node pkg="bluerov_launch" name="mavproxy" type="mavproxy.sh"/>
     <node if="$(arg qgc)" pkg="bluerov_launch" name="qgc" type="qgc.sh"/>
     <include if="$(arg joy)" file="$(find bluerov_control)/launch/joy_control.launch">
         <arg name="translation_limit" value="$(arg translation_limit)"/>
         <arg name="rotation_limit" value="$(arg rotation_limit)"/>
+        <arg name="max_vel" value="$(arg max_vel)"/>
+        <arg name="max_omega" value="$(arg max_omega)"/>
     </include>
 
     <node if="$(arg imu)" pkg="bluerov_launch" name="connect_vn100_imu" type="connect_vn100_imu.sh"/>
