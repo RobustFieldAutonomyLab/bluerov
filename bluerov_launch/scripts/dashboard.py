@@ -61,7 +61,7 @@ if __name__ == "__main__":
         sys.exit(-1)
     rov.update()
 
-    dvl_sub = rospy.Subscriber('/rti/body_velocity/raw', BottomTrack, dvl_callback, queue_size=100)
+    dvl_sub = rospy.Subscriber('/rti/bottom_tracking/raw', BottomTrack, dvl_callback, queue_size=100)
     depth_sub = rospy.Subscriber('/bar30/depth/raw', Depth, depth_callback, queue_size=100)
     imu_sub = rospy.Subscriber('/vn100/imu/raw', Imu, imu_callback, queue_size=1000)
     sonar_sub = rospy.Subscriber('/sonar_oculus_node/ping', OculusPing, sonar_callback, queue_size=10)
