@@ -9,8 +9,7 @@
     <arg name="joy" default="true"/>
     <arg name="water" default="fresh"/>
 
-    <!-- extra DVL commands (split by '\n') -->
-    <!-- <arg name="commands" default="CBTT 20,150,20,8\n"/> -->
+    <!-- extra DVL commands (split by ';') -->
     <arg name="commands" default=""/>
 
     <arg name="translation_limit" default="100"/>

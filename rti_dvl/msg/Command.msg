@@ -49,9 +49,9 @@ string CBTON
 #     Non-coded has slightly higher variance than the coded transmit without the annoying autocorrelation side peaks. Better for small bins.
 #     4 = Non Coded Broadband pulse-to-pulse (no ambiguity resolver).
 #     Provides ultra low variance for small bin sizes.
-#     7 = Auto Switch (n=0, n=2, n=4)kkkkkkkkkkkkkkkkkk
+#     7 = Auto Switch (n=0, n=2, n=4)
 # [m] - Lag length in vertical meters (m)
-#     The lag length will set the maximum velocity the ADCP can read. A rule of thumb is to set the lag length, where 1.5 is a ‘safety factor’.    
+#     The lag length will set the maximum velocity the ADCP can read. A rule of thumb is to set the lag length, where 1.5 is a 'safety factor'.    
 # [d] - Long Range Narrowband Auto Switch Depth (m)
 #     The depth to switch from Broadband to Narrowband in meters. This is used in the Auto Switch mode.
 # [x] - Beam Multiplex

@@ -48,11 +48,17 @@ class SyncTime(object):
         return stamp
 
 
+def write_to_dvl(s, duration=0.5):
+    dvl.write((s.strip() + '\r').encode())
+    rospy.sleep(duration)
+
+
 if __name__ == '__main__':
     rospy.init_node('rti_dvl_node')
 
     dev = rospy.get_param('~dev', '/tmp/rti_dvl')
-    config = rospy.get_param('~commands', '').split('\n')
+    # Get configurations split by ;
+    config = rospy.get_param('~commands', '').split(';')
 
     if not rospy.has_param('/water'):
         rospy.set_param('/water', 'fresh')
@@ -78,26 +84,25 @@ if __name__ == '__main__':
 
     # STOP
     while dvl.in_waiting:
-        dvl.readline()
-        dvl.write('STOP\r'.encode())
-        rospy.sleep(0.1)
+        line = dvl.readline()
+        if line.strip().startswith('STOP'):
+            break
+        write_to_dvl('STOP')
         rospy.loginfo_throttle(1.0, 'Trying to stop DVL pinging...')
 
     # Zero pressure sensor
-    dvl.write('CPZ\r'.encode())
+    write_to_dvl('CPZ')
     # Change water salinity
-    dvl.write('CWS {}\r'.format(salinity).encode())
+    write_to_dvl('CWS {}'.format(salinity))
     # Write extra commands in config file
     for c in config:
-        if not c.startswith('#'):
-            rospy.loginfo('Write ' + (c.strip() + '\r').encode())
-            dvl.write((c.strip() + '\r').encode())
-            rospy.sleep(0.1)
+        if c:
+            write_to_dvl(c)
+            rospy.loginfo('Write to DVL: ' + c)
 
     cmd = Command()
     while True:
-        dvl.write('CSHOW\r'.encode())
-        rospy.sleep(0.1)
+        write_to_dvl('CSHOW')
         rospy.loginfo_throttle(1.0, 'Trying to read DVL commands...')
 
         received = False
@@ -114,11 +119,12 @@ if __name__ == '__main__':
         
         if received:
             break
+        else:
+            rospy.sleep(1.0)
 
     # Start
     while not dvl.in_waiting:
-        dvl.write('START\r'.encode())
-        rospy.sleep(0.1)
+        write_to_dvl('START')
         rospy.loginfo_throttle(1.0, 'Trying to start DVL pinging...')
 
     sync = SyncTime()
