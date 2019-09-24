@@ -12,6 +12,9 @@
     <arg name="water" default="salt"/>
     <param name="water" type="str" value="$(arg water)"/>
 
+    <!-- extra DVL commands (split by ';') -->
+    <arg name="commands" default=""/>
+
     <arg name="translation_limit" default="100"/>
     <arg name="rotation_limit" default="80"/>
     <!-- cmd_vel limit (max will ouput max PWM) -->
@@ -35,6 +38,7 @@
     <node if="$(arg dvl)" pkg="bluerov_launch" name="connect_rti_dvl" type="connect_rti_dvl.sh"/>
     <node if="$(arg dvl)" pkg="rti_dvl" name="rti_dvl" type="rti_dvl_node.py" output="screen">
         <param name="device" value="/tmp/rti_dvl"/>
+        <param name="commands" value="$(arg commands)"/>
     </node>
 
     <node if="$(arg depth)" pkg="bar30_depth" name="bar30_depth" type="bar30_depth_node.py" output="screen">

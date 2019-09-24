@@ -2,7 +2,7 @@
 import sys
 import rospy
 from std_srvs.srv import Trigger, TriggerResponse, TriggerRequest
-from rti_dvl.msg import DVL
+from rti_dvl.msg import DVL, Command, BottomTrack
 
 import pynmea2
 import serial
@@ -29,9 +29,7 @@ class SyncTime(object):
         cur_adj = system_time_stamp.to_sec() - self.hardware_clock
         if self.adj_count > 0:
             self.hardware_clock_adj = (
-                self.adj_alpha * cur_adj
-                + (1.0 - self.adj_alpha) * self.hardware_clock_adj
-            )
+                self.adj_alpha * cur_adj + (1.0 - self.adj_alpha) * self.hardware_clock_adj)
         else:
             self.hardware_clock_adj = cur_adj
 
@@ -50,81 +48,32 @@ class SyncTime(object):
         return stamp
 
 
-# def zeor_pressure(req):
-#     rospy.loginfo('Zero pressure sensor')
-
-#     dvl.write('CPZ\r\n')
-#     return TriggerResponse(success=True)
-
-
-# def toggle_status(req):
-#     global running
-#     if running:
-#         rospy.loginfo('Stop DVL')
-#         dvl.write('STOP\r\n')
-#         running = False
-#         return TriggerResponse(success=True, message='Stop')
-#     else:
-#         rospy.loginfo('Start DVL')
-#         dvl.write('START\r\n')
-#         running = True
-#         return TriggerResponse(success=True, message='Start')
+def write_to_dvl(s, duration=0.5):
+    dvl.write((s.strip() + '\r').encode())
+    rospy.sleep(duration)
 
 
 if __name__ == '__main__':
     rospy.init_node('rti_dvl_node')
 
     dev = rospy.get_param('~dev', '/tmp/rti_dvl')
+    # Get configurations split by ;
+    config = rospy.get_param('~commands', '').split(';')
 
     if not rospy.has_param('/water'):
         rospy.set_param('/water', 'fresh')
     water = rospy.get_param('/water', 'fresh')
     salinity = SALINITY[water]
 
-    rospy.logwarn('Water is {}. Please set salinity in DVL.'.format(water))
+    dvl_pub = rospy.Publisher('/rti/body_velocity/raw', DVL, queue_size=100)
+    bt_pub = rospy.Publisher('/rti/bottom_tracking/raw', BottomTrack, queue_size=100)
 
-    # TODO
-    # Change salinity here
-
-    # eoutput = rospy.get_param('eoutput', 5)
-    # ei = rospy.get_param('ei', 0.25)
-
-    # btbb_pulse_type = rospy.get_param('btbb_pulse_type', 4)
-    # btbb_lag_length = rospy.get_param('btbb_lag_length', 4.0)
-    # btbb_depth_switch = rospy.get_param('btbb_depth_switch', 30.0)
-    # btbb_beam_multiplex = rospy.get_param('btbb_beam_multiplex', 4)
-    # btmx_depth = rospy.get_param('btmx_depth', 5.0)
-    # btst_correlation = rospy.get_param('btst_correlation', 0.9)
-    # btst_error_velocity = rospy.get_param('btst_error_velocity', 10.0)
-    # btst_velocity = rospy.get_param('btst_velocity', 10.0)
-    # btbl_shallow = rospy.get_param('btbl_shallow', 0.1)
-    # btbl_deep = rospy.get_param('btbl_deep', 10.0)
-    # bttbp_interval = rospy.get_param('bttbp_inverval', 0.13)
-    # btt_snr_shallow = rospy.get_param('btt_snr_shallow', 30.0)
-    # btt_depth_shallow_switch = rospy.get_param('btt_depth_shallow_switch',
-    #                                            50.0)
-    # btt_snr_deep = rospy.get_param('btt_snr_deep', 20.0)
-    # btt_depth_deep_switch = rospy.get_param('btt_depth_deep_switch', 4.0)
-
-    # wssc_temperature = rospy.get_param('cwssc_temperature', 1)
-    # wssc_depth = rospy.get_param('cwssc_depth', 1)
-    # wssc_salinity = rospy.get_param('cwssc_salinity', 0)
-    # wssc_sound_speed = rospy.get_param('cwssc_sound_speed', 2)
-    # ws = rospy.get_param('cws', 0.0)
-    # td = rospy.get_param('ctd', 0.0)
-    # wt = rospy.get_param('cwt', 15.0)
-    # wss = rospy.get_param('cwss', 1500.0)
-
-    # zps_srv = rospy.Service('~zero_pressure', Trigger, zeor_pressure)
-    # ts_srv = rospy.Service('~toggle_status', Trigger, toggle_status)
-
-    global running
-    running = False
     while not rospy.is_shutdown():
         try:
             rospy.loginfo('Open device {}'.format(dev))
             dvl = serial.Serial(dev, dsrdtr=True, rtscts=True, timeout=1.0)
             # dvl = serial.Serial(dev)
+            rospy.sleep(1.0)
         except serial.SerialException:
             rospy.logerr('Fail to open device {}'.format(dev))
             rospy.sleep(1.0)
@@ -133,50 +82,66 @@ if __name__ == '__main__':
     if rospy.is_shutdown():
         sys.exit(-1)
 
-    # #DVL Commands
-    # http://rowetechinc.co/wiki/index.php?title=ADCP_Commands
-    # dvl.write('C485OUT {:1d}\r\rn'.format(eoutput))
-    # dvl.write('CEI 00:00:' + '%05.2f\r\n' % ei)
-    # dvl.write('CBTBB[0] {:1d},{:.2f},{:.2f},{:1d}\r\n'.format(
-    #     btbb_pulse_type, btbb_lag_length, btbb_depth_switch,
-    #     btbb_beam_multiplex))
-    # dvl.write('CBTST[0] {:.3f},{:.3f},{:.3f}\r\n'.format(
-    #     btst_correlation, btst_error_velocity, btst_velocity))
-    # dvl.write('CBTBL[0] {:2.f},{:.2f}\r\n'.format(btbl_shallow, btbl_deep))
-    # dvl.write('CBTMX[0] {:.2f}\r\n'.format(btmx_depth))
-    # dvl.write('CBTTBP[0] {:.2f}\r\n'.format(bttbp_interval))
-    # dvl.write('CBTT[0] {:.1f},{:.1f},{:.1f},{:.1f}\r\n'.format(
-    #     btt_snr_shallow, btt_depth_shallow_switch, btt_snr_deep,
-    #     btt_depth_deep_switch))
-    # dvl.write('CWSSC {:1d},{:1d},{:1d},{:1d}\r\n'.format(
-    #     wssc_temperature, wssc_depth, wssc_salinity, wssc_sound_speed))
-    # dvl.write('CWS {:.2f}\r\n'.format(ws))
-    # dvl.write('CWT {:.2f}\r\n'.format(wt))
-    # dvl.write('CTD {:.2f}\r\n'.format(td))
-    # dvl.write('CWSS {:.2f}\r\n'.format(wss))
-    # dvl.write('CSAVE\r\n')
+    # STOP
+    while dvl.in_waiting:
+        line = dvl.readline()
+        if line.strip().startswith('STOP'):
+            break
+        write_to_dvl('STOP')
+        rospy.loginfo_throttle(1.0, 'Trying to stop DVL pinging...')
 
-    # running = True
-    # if not toggle_status(TriggerRequest).success:
-    #     rospy.logerr('Fail to stop DVL')
-    # else:
-    #     running = False
+    # Zero pressure sensor
+    write_to_dvl('CPZ')
+    # Change water salinity
+    write_to_dvl('CWS {}'.format(salinity))
+    # Write extra commands in config file
+    for c in config:
+        if c:
+            write_to_dvl(c)
+            rospy.loginfo('Write to DVL: ' + c)
 
-    dvl_pub = rospy.Publisher('/rti/body_velocity/raw', DVL, queue_size=100)
-    reader = pynmea2.NMEAStreamReader(errors='ignore')
+    cmd = Command()
+    while True:
+        write_to_dvl('CSHOW')
+        rospy.loginfo_throttle(1.0, 'Trying to read DVL commands...')
+
+        received = False
+        while dvl.in_waiting:
+            line = dvl.readline()
+            cp = line.strip().split(' ', 1)
+            if len(cp) == 2:
+                c, p = cp
+                if c == 'CEPO':
+                    received = True
+                c = c.split('[', 1)[0]
+                if c in cmd.__slots__:
+                    setattr(cmd, c, p)
+        
+        if received:
+            break
+        else:
+            rospy.sleep(1.0)
+
+    # Start
+    while not dvl.in_waiting:
+        write_to_dvl('START')
+        rospy.loginfo_throttle(1.0, 'Trying to start DVL pinging...')
 
     sync = SyncTime()
+    reader = pynmea2.NMEAStreamReader(errors='ignore')
+
+    bt = None
     while not rospy.is_shutdown():
         try:
             char = dvl.read()
         except serial.SerialException:
             break
         for msg in reader.next(char):
-            if isinstance(msg, pynmea2.types.rti.RTI01) or isinstance(
-                msg, pynmea2.types.rti.RTI03
-            ):
-                d = DVL()
+            if isinstance(msg, pynmea2.types.rti.RTI01) or isinstance(msg, pynmea2.types.rti.RTI03):
                 stamp = sync.sync(msg.time / 100.0, rospy.Time.now())
+
+                # For back compability
+                d = DVL()
                 d.header.stamp = stamp
                 d.velocity.x = msg.x / 1000.0
                 d.velocity.y = msg.y / 1000.0
@@ -185,4 +150,24 @@ if __name__ == '__main__':
                 d.altitude = msg.depth / 1000.0
                 d.time = msg.time / 100.0
                 dvl_pub.publish(d)
+
+                bt = BottomTrack()
+                bt.header.stamp = stamp
+                bt.command = cmd
+                bt.velocity.x = msg.x / 1000.0
+                bt.velocity.y = msg.y / 1000.0
+                bt.velocity.z = msg.z / 1000.0
+                bt.temperature = msg.temperature / 100.0
+                bt.altitude = msg.depth / 1000.0
+                bt.time = msg.time / 100.0
+                bt.sample = msg.number
+
+            if isinstance(msg, pynmea2.types.rti.RTI30) or isinstance(msg, pynmea2.types.rti.RTI32):
+                if bt is None:
+                    continue
+                bt.orientation.x = msg.roll
+                bt.orientation.y = msg.pitch
+                bt.orientation.z = msg.heading
+                bt_pub.publish(bt)
+
     dvl.close()

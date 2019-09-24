@@ -10,6 +10,8 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
    FILES
    DVL.msg
+   Command.msg
+   BottomTrack.msg
 )
 
 generate_messages(
